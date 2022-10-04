@@ -7,7 +7,7 @@ from sunpy.coordinates import frames
 import matplotlib.pyplot as plt
 
 # Function for out own use in converted .sav data to SunPy maps
-def sav_to_fits(filename='IBIS.granulation.aligned.25Apr2019.seq56.sav'):
+def sav_to_maps(filename):
 
     fake_coord = SkyCoord(0*u.arcsec, 0*u.arcsec, obstime='2013-10-28 08:24',
                  observer='earth', frame=frames.Helioprojective)
