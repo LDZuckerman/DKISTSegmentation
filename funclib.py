@@ -26,6 +26,47 @@ def sav_to_maps(filename):
     velocity_clean =  sunpy.map.Map(data['velocity_cln'], fake_header)#  velocities after removal of the large scale structures (which are related more to oscillations than the granulation/convective overshoot)
     
     return flux_4170, flux_4310, flux_4170, flux_7200, velocity, velocity_clean
+
+def sav_to_numpy(filename, instrument, band):
+    """ Read .sav file data into a numpy array.
+        Parameters:
+        ----------
+
+        filename (string): Path to input data file (.sav format)
+        instrument (string): The telescope/instrument (ie. IBIS, DKSIST).
+        band (string): Band or data field to read.
+
+        Returns:
+        -------
+
+        data (numpy array): Array of data values.
+    """
+
+
+    if instrument != 'IBIS':
+        print('This functionality has so far only been implemented ' + 
+              'for IBIS data.')
+        sys.ext(1)
+    
+    bands = ['rosa_wl', 'rosa_gband', 'ibis_wl', 'velocity', 'velocity_cln']
+    if band not in bands:
+        print('Band must be one of: ')
+        print('rosa_wl      --> 4170 A')
+        print('rosa_gband   --> 4310 A')
+        print('ibis_wl      --> 7200 A')
+        print('velocity     --> velocity in km/sec at 7090 Å')
+        print('velocity_cln --> velocity with large-scale structure removed')
+        sys.exit(1)
+
+    # TO DO: catch error if file is not in sav format
+    file = sio.readsav(filename)
+    data = file[band]
+    
+    return 
+
+    
+    
+        
   
 
         
