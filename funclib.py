@@ -62,7 +62,7 @@ def sav_to_numpy(filename, instrument, band):
     file = sio.readsav(filename)
     data = file[band]
     
-    return 
+    return data
 
     
     

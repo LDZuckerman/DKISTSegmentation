@@ -56,27 +56,27 @@ def main():
     data = funclib.sav_to_numpy(input_file, 'IBIS', 'rosa_gband')
     
     # apply median filter
-    median_filtered = scipy.ndimage.median_filter(grayscale, size=3)
+    median_filtered = scipy.ndimage.median_filter(data, size=3)
 
     # apply threshold
     if method == 'otsu':
-        threshold == skimage.filters.threshold_otsu(median_filtered)
+        threshold = skimage.filters.threshold_otsu(median_filtered)
     elif method == 'li':
-        threshold == skimage.filters.threshold_li(median_filtered)
+        threshold = skimage.filters.threshold_li(median_filtered)
     elif method == 'yen':
-        threshold == skimage.filters.threshold_yen(median_filtered)
+        threshold = skimage.filters.threshold_yen(median_filtered)
     elif method == 'mean':
-        threshold == skimage.filters.threshold_mean(median_filtered)
+        threshold = skimage.filters.threshold_mean(median_filtered)
     elif method == 'minimum':
         threshold = skimage.filters.threshold_minimum(median_filtered)
     elif method == 'triangle':
         threshold = skimage.filters.threshold_triangle(median_filtered)
     elif method == 'isodata':
-        threshold == skimage.filters.threshold_isodata(median_filtered)
+        threshold = skimage.filters.threshold_isodata(median_filtered)
         
     plt.figure(figsize = [20,40])
     segmented_image = np.uint8(median_filtered > threshold) * 255
-    plt.imshow(segmented, cmap='gray')
+    plt.imshow(segmented_image, cmap='gray')
     plt.axis('off')
     plt.title('Image segmented using ' + method + 'method')
     plt.savefig(output_file)
