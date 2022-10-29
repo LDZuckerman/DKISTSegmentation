@@ -10,6 +10,7 @@ import skimage.filters
 import sklearn.metrics
 import funclib
 
+
 def main():
     """ Use skimage to segement solar data.
 
@@ -28,11 +29,11 @@ def main():
 
     """
 
-    parser = argparse.ArgumentParser(description='') 
+    parser = argparse.ArgumentParser(description='')
     parser.add_argument('--input_file', dest='input_file',
                         type=str,
-                        help='Input datafile path.',  # 'ie: ./IBIS.granulation.aligned.25Apr2019.seq56.sav'
-                        required=True)    
+                        help='Input datafile path.',
+                        required=True)
     parser.add_argument('--method', dest='method',
                         type=str,
                         help='Method to use for segmentation',
@@ -51,10 +52,10 @@ def main():
     if method not in methods:
         print('Method must be one of: ' + str(methods))
         sys.exit(1)
-        
+
     # read in data
     data = funclib.sav_to_numpy(input_file, 'IBIS', 'rosa_gband')
-    
+
     # apply median filter
     median_filtered = scipy.ndimage.median_filter(data, size=3)
 
@@ -73,14 +74,14 @@ def main():
         threshold = skimage.filters.threshold_triangle(median_filtered)
     elif method == 'isodata':
         threshold = skimage.filters.threshold_isodata(median_filtered)
-        
-    plt.figure(figsize = [20,40])
+
+    plt.figure(figsize=[20, 40])
     segmented_image = np.uint8(median_filtered > threshold) * 255
     plt.imshow(segmented_image, cmap='gray') # 0 (intergranule) = black, 225 (granule) = white 
     plt.axis('off')
     plt.title('Image segmented using ' + method + 'method')
     plt.savefig(output_file)
-    
-    
+
+
 if __name__ == "__main__":
     main()

@@ -7,9 +7,6 @@ from sunpy.coordinates import frames
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
-import skimage
-import scipy
-import os
 
 def open_file(filename):
     """ Convenience function for catching file read errors.
@@ -93,7 +90,7 @@ def sav_to_numpy(filename, instrument, field):
 
         data (numpy array): Array of data values.
     """
-
+    
     try:
         data = readsav(filename)
     except FileNotFoundError:
@@ -102,7 +99,7 @@ def sav_to_numpy(filename, instrument, field):
         raise Exception('Data does not appear to be in correct .sav format')
 
     if instrument != 'IBIS':
-        print('This functionality has so far only been implemented ' + 
+        print('This functionality has so far only been implemented ' +
               'for IBIS data.')
         sys.ext(1)
     
@@ -280,4 +277,3 @@ def mark_faculae(segmented_image, data):
                     segmented_image_fixed[mask==1] = 0.5
         
     return segmented_image_fixed
-
