@@ -1,0 +1,11 @@
+name: base
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  - pycodestyle
+  - matplotlib
+  - scipy
+  - sunpy
+  - skimage
+  - astropy
