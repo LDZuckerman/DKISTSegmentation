@@ -6,7 +6,7 @@ def main():
     parser = argparse.ArgumentParser(description='') 
     parser.add_argument('--input_file', dest='input_file',
                         type=str,
-                        help='Input datafile path.',  
+                        help='Input datafile path.',
                         required=True)    
     parser.add_argument('--skimage_method', dest='skimage_method',
                         type=str,

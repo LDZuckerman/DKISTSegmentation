@@ -9,7 +9,34 @@ import numpy as np
 import sys
 import skimage
 import scipy
+import os
 
+def open_file(filename):
+    """ Convenience function for catching file read errors.
+        Parameters:
+        ----------
+        filename: (string) Path to file.
+        Returns:
+        -------
+        Nothing
+    """
+    if not os.path.exists(filename):
+        print('Input file ' + filename + ' could not be found.')
+        sys.exit(1)
+    if os.path.isdir(filename):
+        print('Input file ' + filename + ' is a directory.')
+        sys.exit(1)
+    if not os.access(filename, os.R_OK):
+        print('Input file ' + filename + ' is not readable.')
+        sys.exit(1)
+    if not (filename.endswith('.sav') | filename.endswith('.gz')):
+        print('Input file must be a .sav file.')
+        sys.exit(1)
+    if os.path.getsize(filename) == 0:
+        print('Input file must not be empty.')
+        sys.exit(1)
+
+    return
 
 def sav_to_map(filename, field):
     """ Read .sav file data into a sunpy map.
