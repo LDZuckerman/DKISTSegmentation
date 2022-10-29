@@ -77,7 +77,7 @@ def main():
 
     plt.figure(figsize=[20, 40])
     segmented_image = np.uint8(median_filtered > threshold) * 255
-    plt.imshow(segmented_image, cmap='gray')
+    plt.imshow(segmented_image, cmap='gray') # 0 (intergranule) = black, 225 (granule) = white 
     plt.axis('off')
     plt.title('Image segmented using ' + method + 'method')
     plt.savefig(output_file)
