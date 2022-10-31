@@ -3,14 +3,12 @@ test -e ssshtest || wget -q https://raw.githubusercontent.com/ryanlayer/ssshtest
 
 
 # check that output plot directory is correct
-#wget "https://storage.googleapis.com/gtex_analysis_v8/annotations/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt"
-run test_segment_skimage python segment_skimage.py  \
-    --input_file 'IBIS.granulation.aligned.25Apr2019.seq56.sav' \
-    --method 'li' \
-    --output_file 'li_segmented.png' \
+run test_segment python ../segment.py  \
+    --input_file '../IBIS.granulation.aligned.25Apr2019.seq56.sav' \
+    --skimage_method 'li' \
 
 curr_dir=$(pwd)
-file='/li_segmented.png'
+file='/intermediate_outputs.png'
 path=$curr_dir$file
 # check that the output file actually exists
 if [ -f "$path" ]; then
@@ -18,4 +16,5 @@ if [ -f "$path" ]; then
 else
    echo ' TEST FAILED: output plot not found in expected location!'
 fi
+rm $path
 assert_exit_code 0
