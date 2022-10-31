@@ -1,7 +1,10 @@
+import scipy
 import scipy.io as sio
 from scipy.io import readsav
 import astropy.units as u
 from astropy.coordinates import SkyCoord
+import skimage
+import sunpy
 import sunpy.map
 from sunpy.coordinates import frames
 import matplotlib.pyplot as plt
@@ -130,8 +133,15 @@ def segment(data_map, skimage_method):
 
     data_map (SunPy map): SunPy map containing segmentated image (with the
                           original header)
-"""
+    """
 
+    if type(data_map) != sunpy.map.mapbase.GenericMap:
+        raise TypeError('Input must be sunpy map.')
+    
+    methods = ['otsu', 'li', 'isodata', 'mean', 'minimum', 'yen', 'triangle']
+    if skimage_method not in methods:
+        raise TypeError('Method must be one of: ' + str(methods))
+    
     data = data_map.data
     header = data_map.meta
 
@@ -192,8 +202,7 @@ def get_threshold(data, method):
 
     methods = ['otsu', 'li', 'isodata', 'mean', 'minimum', 'yen', 'triangle']
     if method not in methods:
-        print('Method must be one of: ' + str(methods))
-        sys.exit(1)
+        raise ValueError('Method must be one of: ' + str(methods))
     if method == 'otsu': # works ok, but classifies low-flux ganules as IG
         threshold = skimage.filters.threshold_otsu(data)
     elif method == 'li': # slightly better than otsu
@@ -227,8 +236,7 @@ def remove_middles(segmented_image):
     """   
 
     if len(np.unique(segmented_image)) > 2:
-        print('segmented_image must have only values of 1 and 0')
-        sys.exit(1)
+        raise ValueError('segmented_image must have only values of 1 and 0')  
 
     segmented_image = segmented_image #[80:90, 130:140]/255 
     segmented_image_fixed = np.copy(segmented_image)
@@ -243,13 +251,14 @@ def remove_middles(segmented_image):
 
     return segmented_image_fixed
         
-  
+
 def mark_faculae(segmented_image, data):
     """ Mark faculae seperatly from granules - give them a value of 0.5 not 1
 
         Parameters:
         ----------
 
+        data (numpy array): the original flux values
         segmented_image (numpy array): the segmented image containing incorrect middles
 
         Returns:
@@ -259,8 +268,7 @@ def mark_faculae(segmented_image, data):
     """   
 
     if len(np.unique(segmented_image)) > 2:
-        print('segmented_image must have only values of 1 and 0')
-        sys.exit(1)
+        raise ValueError('segmented_image must have only values of 1 and 0')
 
     segmented_image = segmented_image#[80:90, 130:140]
     segmented_image_fixed = np.copy(segmented_image.astype(float))
