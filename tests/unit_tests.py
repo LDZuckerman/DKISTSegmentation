@@ -1,3 +1,5 @@
+import sys
+sys.path.append('..')  # nopep8
 import unittest
 import funclib
 import random
