@@ -38,10 +38,9 @@ segmentation processing.
 ## Thresholding methods
 
 The pipeline is built on existing sci-kit image (skimage) packages to determine
-thresholding values. These are passed to the segment function as 'skimage-method'
-The possible methods include:
-
-TO DO: ADD WHY ONE WOULD CHOOSE EACH METHOD
+thresholding values. These are passed to the segment function as 'skimage-
+method'. We recomend use of the 'Li' or 'mean' methods, although all should be
+tested on a given dataset.  
 
 ## Example
 
