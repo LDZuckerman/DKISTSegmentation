@@ -3,8 +3,8 @@ test -e ssshtest || wget -q https://raw.githubusercontent.com/ryanlayer/ssshtest
 
 
 # check that output plot directory is correct
-run test_segment python ../segment.py  \
-    --input_file '../IBIS.granulation.aligned.25Apr2019.seq56.sav' \
+run test_segment python segment.py  \
+    --input_file 'IBIS.granulation.aligned.25Apr2019.seq56.sav' \
     --skimage_method 'li' \
 
 curr_dir=$(pwd)
