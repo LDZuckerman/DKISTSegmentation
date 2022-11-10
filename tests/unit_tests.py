@@ -95,8 +95,13 @@ class TestUtils(unittest.TestCase):
                                segmented.data[x[i], y[i]])
 
         # error raising tests
-        cls.assertRaises(TypeError, funclib.segment, data_map, 'skimage')
-        cls.assertRaises(TypeError, funclib.segment,
+        cls.assertRaises(TypeError,
+                         funclib.segment,
+                         data_map,
+                         'skimage')
+
+        cls.assertRaises(TypeError,
+                         funclib.segment,
                          funclib.sav_to_numpy(cls.testfile,
                                               cls.test_instrument,
                                               cls.test_band), 'skimage')
