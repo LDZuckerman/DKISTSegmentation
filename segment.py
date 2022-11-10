@@ -1,8 +1,17 @@
 import argparse
 import funclib
 
+# TODO:
+#  1. add handing of fits format or asdf format (DKIST data format (?) )
 
 def main():
+    """
+    Main Overview:
+    1. Uses argparse to get filename and segmentation method
+    2. Reads in the .sav data file, converts to a sunpy map
+    3. Calls the segmentation & any post-processing
+    4. Save images of the original data and the intermediate steps
+    """
 
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--input_file', dest='input_file',
