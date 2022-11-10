@@ -57,7 +57,7 @@ def sav_to_map(filename, field):
     try:
         data = sio.readsav(filename)
     except FileNotFoundError:
-        raise FileNotFoundError('Cannot find '+filename)
+        raise FileNotFoundError('Cannot find ' + filename)
     except Exception:
         raise Exception('Data does not appear to be in correct .sav format')
 
@@ -65,15 +65,16 @@ def sav_to_map(filename, field):
         print('Field ' + field + ' is not in file keys ', data.keys())
         sys.exit(1)
 
-    fake_coord = SkyCoord(0*u.arcsec, 0*u.arcsec, obstime='2013-10-28 08:24',
+    fake_coord = SkyCoord(0 * u.arcsec, 0 * u.arcsec, obstime='2013-10-28 08:24',
                           observer='earth', frame=frames.Helioprojective)
-    fake_header = sunpy.map.make_fitswcs_header(data=np.empty((512, 512)),
-                                                coordinate=fake_coord,
-                                                reference_pixel=[0, 0]*u.pixel,
-                                                scale=[2, 2]*u.arcsec/u.pixel,
-                                                telescope='Fake Telescope',
-                                                instrument='Fake Instrument',
-                                                wavelength=1000*u.angstrom)
+    fake_header = \
+        sunpy.map.make_fitswcs_header(data=np.empty((512, 512)),
+                                      coordinate=fake_coord,
+                                      reference_pixel=[0, 0] * u.pixel,
+                                      scale=[2, 2] * u.arcsec / u.pixel,
+                                      telescope='Fake Telescope',
+                                      instrument='Fake Instrument',
+                                      wavelength=1000 * u.angstrom)
 
     data_map = sunpy.map.Map(data[field], fake_header)
 
@@ -99,7 +100,7 @@ def sav_to_numpy(filename, instrument, field):
     try:
         data = sio.readsav(filename)
     except FileNotFoundError:
-        raise FileNotFoundError('Cannot find '+filename)
+        raise FileNotFoundError('Cannot find ' + filename)
     except Exception:
         raise Exception('Data does not appear to be in correct .sav format')
 
@@ -168,7 +169,7 @@ def segment(data_map, skimage_method):
     s1 = 20
     s2 = 26
     fig.suptitle('Intermediate processesing steps ', fontsize=s2)
-    im0 = ax0.imshow(data/np.max(data))
+    im0 = ax0.imshow(data / np.max(data))
     ax0.set_title('scaled input image', fontsize=s1)
     plt.colorbar(im0, ax=ax0)
     im1 = ax1.imshow(segmented_image, cmap='gray')
@@ -247,9 +248,9 @@ def remove_middles(segmented_image):
     if len(np.unique(segmented_image)) > 2:
         raise ValueError('segmented_image must have only values of 1 and 0')
 
-    segmented_image = segmented_image   # [80:90, 130:140]/255
+    segmented_image = segmented_image  # [80:90, 130:140]/255
     segmented_image_fixed = np.copy(segmented_image)
-    labeled_seg = skimage.measure.label(segmented_image+1, connectivity=2)
+    labeled_seg = skimage.measure.label(segmented_image + 1, connectivity=2)
     values = np.unique(labeled_seg)
     for value in values:
         mask = np.zeros_like(segmented_image)
@@ -285,7 +286,7 @@ def mark_faculae(segmented_image, data):
 
     segmented_image = segmented_image  # [80:90, 130:140]
     segmented_image_fixed = np.copy(segmented_image.astype(float))
-    labeled_seg = skimage.measure.label(segmented_image+1, connectivity=2)
+    labeled_seg = skimage.measure.label(segmented_image + 1, connectivity=2)
     values = np.unique(labeled_seg)
     for value in values:
         mask = np.zeros_like(segmented_image)
@@ -297,7 +298,7 @@ def mark_faculae(segmented_image, data):
             # check that region is small [bad criteria, change later on]
             if region_size < 20:
                 # check that avg flux very high
-                if tot_flux/region_size > 4000:
+                if tot_flux / region_size > 4000:
                     segmented_image_fixed[mask == 1] = 0.5
 
     return segmented_image_fixed
