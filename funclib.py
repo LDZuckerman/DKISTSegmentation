@@ -164,28 +164,35 @@ def segment(data_map, skimage_method):
     # mark faculae
     segmented_image_markfac = mark_faculae(segmented_image_fixed, data)
 
-    # show pipeline process
+    # make a plot for pipeline process
+
+    fontsize1 = 30
+    fontsize2 = 40
+
     fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2, 2, figsize=(30, 30))
-    s1 = 20
-    s2 = 26
-    fig.suptitle('Intermediate processesing steps ', fontsize=s2)
+    fig.suptitle('Intermediate processesing steps ', fontsize=fontsize2)
+
     im0 = ax0.imshow(data / np.max(data))
-    ax0.set_title('scaled input image', fontsize=s1)
+    ax0.set_title('scaled input image', fontsize=fontsize1)
     plt.colorbar(im0, ax=ax0)
+
     im1 = ax1.imshow(segmented_image, cmap='gray')
     ax1.set_title('direct ' + skimage_method + ' skimage segmentation',
-                  fontsize=s1)
+                  fontsize=fontsize1)
     plt.colorbar(im1, ax=ax1)
+
     im2 = ax2.imshow(segmented_image_fixed, cmap='gray')
-    ax2.set_title('wrong middles removed', fontsize=s1)
+    ax2.set_title('wrong middles removed', fontsize=fontsize1)
     plt.colorbar(im2, ax=ax2)
+
     im3 = ax3.imshow(segmented_image_markfac, cmap='gray')
-    ax3.set_title('faculae identified', fontsize=s1)
+    ax3.set_title('faculae identified', fontsize=fontsize1)
     plt.colorbar(im3, ax=ax3)
+
     plt.axis('off')
     plt.savefig('intermediate_outputs.png')
 
-    # convert segmentated image back into SunPy map with original header
+    # convert segmented image back into SunPy map with original header
     segmented_map = sunpy.map.Map(segmented_image, header)
 
     return segmented_map
