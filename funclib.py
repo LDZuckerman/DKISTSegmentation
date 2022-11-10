@@ -1,6 +1,5 @@
 import scipy
 import scipy.io as sio
-from scipy.io import readsav
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 import skimage
@@ -56,7 +55,7 @@ def sav_to_map(filename, field):
     """
 
     try:
-        data = readsav(filename)
+        data = sio.readsav(filename)
     except FileNotFoundError:
         raise FileNotFoundError('Cannot find '+filename)
     except Exception:
@@ -98,7 +97,7 @@ def sav_to_numpy(filename, instrument, field):
     """
 
     try:
-        data = readsav(filename)
+        data = sio.readsav(filename)
     except FileNotFoundError:
         raise FileNotFoundError('Cannot find '+filename)
     except Exception:
