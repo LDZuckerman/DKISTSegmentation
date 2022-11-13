@@ -46,5 +46,5 @@ jobs:
           activate-environment: swe4s 
           environment-file: environment.yml # defualt env is test
       - run: | # for multiple lines
-          python -m unittest tests/unit_tests
+          python -m unittest tests/unit_tests.py
 
