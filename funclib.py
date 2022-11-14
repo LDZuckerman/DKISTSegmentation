@@ -23,19 +23,19 @@ def open_file(filename):
     """
     if not os.path.exists(filename):
         raise Exception('Input file ' + filename + ' could not be found.')
-        
+
     if os.path.isdir(filename):
         raise Exception('Input file ' + filename + ' is a directory.')
-        
+
     if not os.access(filename, os.R_OK):
         raise Exception('Input file ' + filename + ' is not readable.')
-        
+
     if not (filename.endswith('.sav') | filename.endswith('.gz')):
         raise Exception('Input file must be a .sav file.')
-        
+
     if os.path.getsize(filename) == 0:
         raise Exception('Input file must not be empty.')
-        
+
     return
 
 
@@ -62,7 +62,8 @@ def sav_to_map(filename, field):
         raise Exception('Data does not appear to be in correct .sav format')
 
     if field not in data.keys():
-        raise Exception('Field ' + field + ' is not in file keys ', data.keys())
+        raise Exception('Field ' + field +
+                        ' is not in file keys ', data.keys())
 
     fake_coord = SkyCoord(0*u.arcsec, 0*u.arcsec, obstime='2013-10-28 08:24',
                           observer='earth', frame=frames.Helioprojective)
@@ -103,13 +104,12 @@ def sav_to_numpy(filename, instrument, field):
         raise Exception('Data does not appear to be in correct .sav format')
 
     if instrument != 'IBIS':
-        raise Exception('This functionality has so far only been implemented ' +
-              'for IBIS data.')
-        
+        raise Exception('This functionality has so far only been ' +
+                        'implemented for IBIS data.')
 
     if field not in data.keys():
-        raise Exception('Field ' + field + ' is not in file keys ', data.keys())
-        
+        raise Exception('Field ' + field + ' is not in file keys ',
+                        data.keys())
 
     # TO DO: catch error if file is not in sav format
     file = sio.readsav(filename)
