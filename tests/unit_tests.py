@@ -7,6 +7,9 @@ import numpy as np
 import sunpy.map as sm
 import scipy
 import sunpy
+from astropy.io import fits
+import os
+import pathlib as pl
 
 
 class TestUtils(unittest.TestCase):
@@ -190,3 +193,42 @@ class TestUtils(unittest.TestCase):
         # ------ error raising tests ------ :
         cls.assertRaises(ValueError, funclib.mark_faculae, data_map.data,
                          data_map.data)
+
+    def test_save_to_fits(cls):
+        """ Unit tests for save_to_fits() function
+        """
+
+        data_map = funclib.sav_to_map(cls.testfile, cls.test_band)
+        segmented_map = funclib.segment(data_map, cls.test_method)
+        funclib.save_to_fits(segmented_map, data_map,
+                             'test_output.fits',
+                             'output/')
+        path = pl.Path('output/test_output.fits')
+        read_seg_data = fits.open('output/test_output.fits')[0].data
+        read_data = fits.open('output/test_output.fits')[1].data
+
+        # positive tests
+        # check that fits file gets created and two data is correct
+        cls.assertTrue(os.path.exists(path))
+        cls.assertTrue(np.array_equal(read_seg_data, segmented_map.data))
+        cls.assertTrue(np.array_equal(read_data, data_map.data))
+
+        # negtaive tests
+        # check that that data maps are not switched
+        cls.assertFalse(np.array_equal(read_seg_data, data_map.data))
+        cls.assertFalse(np.array_equal(read_data, segmented_map.data))
+
+        # error raising tests
+        cls.assertRaises(TypeError,
+                         funclib.save_to_fits,
+                         data_map.data, segmented_map,
+                         'test_output.fits',
+                         'output/')
+        cls.assertRaises(TypeError,
+                         funclib.save_to_fits,
+                         data_map,
+                         segmented_map,
+                         'test_output.fits',
+                         4)
+
+        os.remove('output/test_output.fits')
