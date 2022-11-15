@@ -4,7 +4,7 @@ test -e ssshtest || wget -q https://raw.githubusercontent.com/ryanlayer/ssshtest
 
 # check that output plot directory is correct
 run test_segment python segment.py  \
-    --input_file 'IBIS.granulation.aligned.25Apr2019.seq56.sav' \
+    --input_file 'data/IBIS.granulation.aligned.25Apr2019.seq56.sav' \
     --skimage_method 'li' \
     --plot_intermed True \
     --out_file 'output.fits' \

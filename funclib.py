@@ -11,6 +11,7 @@ from sunpy.coordinates import frames
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
+import astropy.io.fits as fits
 import os
 
 
@@ -117,6 +118,43 @@ def sav_to_map(filename, field):
     return data_map
 
 
+def fits_to_map(filename):
+    """ Read .fits file data into a sunpy map.
+
+    Parameters:
+    ----------
+
+    filename (string): Path to input data file (.fits format)
+
+    Returns:
+    -------
+
+    data: SunPy map containing the data and arbitrary coordinate header
+    """
+
+    try:
+        hdu = fits.open(filename)
+        data = hdu[0].data
+    except FileNotFoundError:
+        raise FileNotFoundError('Cannot find '+filename)
+    except Exception:
+        raise Exception('Data does not appear to be in correct .fits format')
+
+    fake_coord = SkyCoord(0*u.arcsec, 0*u.arcsec, obstime='2013-10-28 08:24',
+                          observer='earth', frame=frames.Helioprojective)
+    fake_header = sunpy.map.make_fitswcs_header(data=np.empty((512, 512)),
+                                                coordinate=fake_coord,
+                                                reference_pixel=[0, 0]*u.pixel,
+                                                scale=[2, 2]*u.arcsec/u.pixel,
+                                                telescope='Fake Telescope',
+                                                instrument='Fake Instrument',
+                                                wavelength=1000*u.angstrom)
+
+    data_map = sunpy.map.Map(data, fake_header)
+
+    return data_map
+
+
 def sav_to_numpy(filename, instrument, field):
     """ Read .sav file data into a numpy array.
 
@@ -140,9 +178,9 @@ def sav_to_numpy(filename, instrument, field):
     except Exception:
         raise Exception('Data does not appear to be in correct .sav format')
 
-    if instrument != 'IBIS':
+    if instrument not in ['IBIS']:
         raise Exception('This functionality has so far only been ' +
-                        'implemented for IBIS data.')
+                        'implemented for IBIS .sav data.')
 
     if field not in data.keys():
         raise Exception('Field ' + field + ' is not in file keys ',
@@ -296,7 +334,6 @@ def remove_middles(segmented_image):
     if len(np.unique(segmented_image)) > 2:
         raise ValueError('segmented_image must have only values of 1 and 0')
 
-    segmented_image = segmented_image   # [80:90, 130:140]/255
     segmented_image_fixed = np.copy(segmented_image)
     labeled_seg = skimage.measure.label(segmented_image+1, connectivity=2)
     values = np.unique(labeled_seg)
