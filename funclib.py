@@ -3,6 +3,7 @@ import scipy.io as sio
 from scipy.io import readsav
 import astropy.units as u
 from astropy.coordinates import SkyCoord
+from astropy.io import fits
 import skimage
 import sunpy
 import sunpy.map
@@ -11,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 import astropy.io.fits as fits
+import os
 
 
 def open_file(filename):
@@ -40,6 +42,40 @@ def open_file(filename):
     return
 
 
+def save_to_fits(segmented_map, data_map, out_file, out_dir):
+    """ Save input sunpy map and output segmented sunpy map to fits file
+
+    Parameters:
+    ----------
+
+    segmented_map (sunpy map): segmented data
+    data_map (sunpy map): input data
+    filename (string): desired name of output fits file
+
+    Returns:
+    -------
+
+    None: creates fits file with first extension being the segmented map and
+    second extension being the input map
+    """
+    if not os.path.exists(out_dir):
+        try:
+            os.mkdir(out_dir)
+        except Exception:
+            raise OSError('Could not make directory ' + out_dir)
+    try:
+        filename = out_dir + out_file
+    except Exception:
+        raise TypeError('Appears that out_dir or out_file are not strings')
+
+    try:
+        segmented_map.save(filename, overwrite=True)
+    except Exception:
+        raise TypeError('segmented_map must be a sunpy map')
+
+    fits.append(filename, data_map.data)
+
+
 def sav_to_map(filename, field):
     """ Read .sav file data into a sunpy map.
 
@@ -60,7 +96,8 @@ def sav_to_map(filename, field):
     except FileNotFoundError:
         raise FileNotFoundError('Cannot find '+filename)
     except Exception:
-        raise Exception('Data does not appear to be in correct .sav format')
+        raise Exception('Data ' + filename + ' does not appear to be in '
+                        + 'correct .sav format')
 
     if field not in data.keys():
         raise Exception('Field ' + field +
@@ -156,7 +193,7 @@ def sav_to_numpy(filename, instrument, field):
     return data
 
 
-def segment(data_map, skimage_method):
+def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/'):
     """ Segment optical image of the solar photosphere into tri-value maps
     with 0 = inter-granule, 0.5 = faculae, 1 = granule.
 
@@ -167,6 +204,10 @@ def segment(data_map, skimage_method):
     skimage_method (string): skimage thresholding method - options are 'otsu',
                              'li', 'isodata', 'mean', 'minimum', 'yen',
                              'triangle'
+    plot_intermed (True or False): whether or not to intermediate data product
+                              image (default True)
+    out_dir (str): Desired directory in which to save intermediate data
+                              product image (if plot_intermed = True)
 
     Returns:
     -------
@@ -200,26 +241,32 @@ def segment(data_map, skimage_method):
     # mark faculae
     segmented_image_markfac = mark_faculae(segmented_image_fixed, data)
 
-    # show pipeline process
-    fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2, 2, figsize=(30, 30))
-    s1 = 20
-    s2 = 26
-    fig.suptitle('Intermediate processesing steps ', fontsize=s2)
-    im0 = ax0.imshow(data/np.max(data))
-    ax0.set_title('scaled input image', fontsize=s1)
-    plt.colorbar(im0, ax=ax0)
-    im1 = ax1.imshow(segmented_image, cmap='gray')
-    ax1.set_title('direct ' + skimage_method + ' skimage segmentation',
-                  fontsize=s1)
-    plt.colorbar(im1, ax=ax1)
-    im2 = ax2.imshow(segmented_image_fixed, cmap='gray')
-    ax2.set_title('wrong middles removed', fontsize=s1)
-    plt.colorbar(im2, ax=ax2)
-    im3 = ax3.imshow(segmented_image_markfac, cmap='gray')
-    ax3.set_title('faculae identified', fontsize=s1)
-    plt.colorbar(im3, ax=ax3)
-    plt.axis('off')
-    plt.savefig('intermediate_outputs.png')
+    if plot_intermed:
+        # show pipeline process
+        fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2, 2, figsize=(30, 30))
+        s1 = 20
+        s2 = 26
+        fig.suptitle('Intermediate processesing steps ', fontsize=s2)
+        im0 = ax0.imshow(data/np.max(data))
+        ax0.set_title('scaled input image', fontsize=s1)
+        plt.colorbar(im0, ax=ax0)
+        im1 = ax1.imshow(segmented_image, cmap='gray')
+        ax1.set_title('direct ' + skimage_method + ' skimage segmentation',
+                      fontsize=s1)
+        plt.colorbar(im1, ax=ax1)
+        im2 = ax2.imshow(segmented_image_fixed, cmap='gray')
+        ax2.set_title('wrong middles removed', fontsize=s1)
+        plt.colorbar(im2, ax=ax2)
+        im3 = ax3.imshow(segmented_image_markfac, cmap='gray')
+        ax3.set_title('faculae identified', fontsize=s1)
+        plt.colorbar(im3, ax=ax3)
+        plt.axis('off')
+        if not os.path.exists(out_dir):
+            try:
+                os.mkdir(out_dir)
+            except Exception:
+                raise OSError('Could not make directory ' + out_dir)
+        plt.savefig(out_dir+'intermediate_outputs.png')
 
     # convert segmentated image back into SunPy map with original header
     segmented_map = sunpy.map.Map(segmented_image, header)
