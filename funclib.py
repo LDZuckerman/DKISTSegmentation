@@ -60,7 +60,7 @@ def sav_to_map(filename, field):
     except FileNotFoundError:
         raise FileNotFoundError('Cannot find '+filename)
     except Exception:
-        raise Exception('Data does not appear to be in correct .fits format')
+        raise Exception('Data does not appear to be in correct .sav format')
 
     if field not in data.keys():
         raise Exception('Field ' + field +
@@ -101,7 +101,7 @@ def fits_to_map(filename):
     except FileNotFoundError:
         raise FileNotFoundError('Cannot find '+filename)
     except Exception:
-        raise Exception('Data does not appear to be in correct .sav format')
+        raise Exception('Data does not appear to be in correct .fits format')
 
     fake_coord = SkyCoord(0*u.arcsec, 0*u.arcsec, obstime='2013-10-28 08:24',
                           observer='earth', frame=frames.Helioprojective)
