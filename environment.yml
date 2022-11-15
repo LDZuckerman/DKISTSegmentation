@@ -1,11 +1,12 @@
 name: base
 channels:
   - conda-forge
+  - anaconda
 dependencies:
   - numpy
   - pycodestyle
   - matplotlib
   - scipy
   - sunpy
-  - skimage
+  - scikit-image
   - astropy

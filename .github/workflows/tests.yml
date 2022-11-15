@@ -1,0 +1,50 @@
+name: Tests
+ 
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    
+jobs:
+  functional:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0} # jobs are run independently in parallel; anytime want conda env need to change for job (only works for ubuntu)
+    steps:
+      - uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: swe4s 
+          environment-file: environment.yml # defualt env is test
+      - run: |
+          bash tests/func_tests.sh
+    
+  codestyle:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0} # jobs are run independently in parallel; anytime want conda env need to change for job (only works for ubuntu)
+    steps:
+      - uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: swe4s 
+          environment-file: environment.yml # defualt env is test
+      - run: pycodestyle $(git ls-files "*.py") # general way to list every python file
+
+  unit_tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0} # jobs are run independently in parallel; anytime want conda env need to change for job (only works for ubuntu)
+    steps:
+      - uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: swe4s 
+          environment-file: environment.yml # defualt env is test
+      - run: | # for multiple lines
+          python -m unittest tests/unit_tests.py
+

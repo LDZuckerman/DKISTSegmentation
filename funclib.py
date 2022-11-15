@@ -24,20 +24,19 @@ def open_file(filename):
         Nothing
     """
     if not os.path.exists(filename):
-        print('Input file ' + filename + ' could not be found.')
-        sys.exit(1)
+        raise Exception('Input file ' + filename + ' could not be found.')
+
     if os.path.isdir(filename):
-        print('Input file ' + filename + ' is a directory.')
-        sys.exit(1)
+        raise Exception('Input file ' + filename + ' is a directory.')
+
     if not os.access(filename, os.R_OK):
-        print('Input file ' + filename + ' is not readable.')
-        sys.exit(1)
+        raise Exception('Input file ' + filename + ' is not readable.')
+
     if not (filename.endswith('.sav') | filename.endswith('.gz')):
-        print('Input file must be a .sav file.')
-        sys.exit(1)
+        raise Exception('Input file must be a .sav file.')
+
     if os.path.getsize(filename) == 0:
-        print('Input file must not be empty.')
-        sys.exit(1)
+        raise Exception('Input file must not be empty.')
 
     return
 
@@ -100,8 +99,8 @@ def sav_to_map(filename, field):
                         + 'correct .sav format')
 
     if field not in data.keys():
-        print('Field ' + field + ' is not in file keys ', data.keys())
-        sys.exit(1)
+        raise Exception('Field ' + field +
+                        ' is not in file keys ', data.keys())
 
     fake_coord = SkyCoord(0*u.arcsec, 0*u.arcsec, obstime='2013-10-28 08:24',
                           observer='earth', frame=frames.Helioprojective)
@@ -142,13 +141,12 @@ def sav_to_numpy(filename, instrument, field):
         raise Exception('Data does not appear to be in correct .sav format')
 
     if instrument != 'IBIS':
-        print('This functionality has so far only been implemented ' +
-              'for IBIS data.')
-        sys.ext(1)
+        raise Exception('This functionality has so far only been ' +
+                        'implemented for IBIS data.')
 
     if field not in data.keys():
-        print('Field ' + field + ' is not in file keys ', data.keys())
-        sys.exit(1)
+        raise Exception('Field ' + field + ' is not in file keys ',
+                        data.keys())
 
     # TO DO: catch error if file is not in sav format
     file = sio.readsav(filename)
@@ -248,6 +246,9 @@ def get_threshold(data, method):
 
         threshold (float): threshold
     """
+
+    if not type(data) == np.ndarray:
+        raise ValueError('Input data must be an array.')
 
     methods = ['otsu', 'li', 'isodata', 'mean', 'minimum', 'yen', 'triangle']
     if method not in methods:

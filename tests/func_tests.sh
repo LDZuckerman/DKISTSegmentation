@@ -15,9 +15,9 @@ file='/output/intermediate_outputs.png'
 path=$curr_dir$file
 # check that the output file actually exists
 if [ -f "$path" ]; then
-   echo ' TEST SUCCEEDED: output plot found in expected location.'
+   echo ' TEST SUCCEEDED: output plot found in '$path 
 else
-   echo ' TEST FAILED: output plot not found in expected location!'
+   echo ' TEST FAILED: output plot not found in '$path 
 fi
 rm $path
 assert_exit_code 0
