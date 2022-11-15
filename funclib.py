@@ -80,6 +80,7 @@ def sav_to_map(filename, field):
 
     return data_map
 
+
 def fits_to_map(filename):
     """ Read .fits file data into a sunpy map.
 
