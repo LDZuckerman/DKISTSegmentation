@@ -17,7 +17,7 @@ class TestUtils(unittest.TestCase):
         """ Set up for unit testing by creating toy data
         """
         cls.testfile = 'data/IBIS.granulation.aligned.25Apr2019.seq56.sav'
-        cls.dksit_testfile = 'data/dkist.cont789nm.scaled.fits'
+        cls.dkist_testfile = 'data/dkist.cont789nm.scaled.fits'
         cls.test_instrument = 'IBIS'
         cls.dkist_instrument = 'DKIST'
         cls.test_method = 'li'
@@ -65,7 +65,7 @@ class TestUtils(unittest.TestCase):
 
         # -------- positive tests -------- :
         # check that the returned type is as expected
-        returned_map = funclib.fits_to_map(cls.dkist_testfile, cls.test_band)
+        returned_map = funclib.fits_to_map(cls.dkist_testfile)
         test_type = type(returned_map)
         cls.assertEqual(test_type, sunpy.map.mapbase.GenericMap)
         # check that returned data is not empty
@@ -78,9 +78,8 @@ class TestUtils(unittest.TestCase):
 
         # ------ error raising tests ------ :
         # check that errors are raised for incorrect inputs
-        cls.assertRaises(Exception, funclib.fits_to_map, 'ABC.txt',
-                         cls.test_band)
-        cls.assertRaises(Exception, funclib.fits_to_map, '', cls.test_band)
+        cls.assertRaises(Exception, funclib.fits_to_map, 'ABC.txt')
+        cls.assertRaises(Exception, funclib.fits_to_map, '')
 
     def test_sav_to_numpy(cls):
 
