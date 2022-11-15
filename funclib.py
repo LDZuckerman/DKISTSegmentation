@@ -41,6 +41,7 @@ def open_file(filename):
 
     return
 
+
 def save_to_fits(segmented_map, data_map, out_file, out_dir):
     """ Save input sunpy map and output segmented sunpy map to fits file
 
@@ -61,13 +62,17 @@ def save_to_fits(segmented_map, data_map, out_file, out_dir):
         try:
             os.mkdir(out_dir)
         except Exception:
-            raise OSError('Could not make directory '+ out_dir)
+            raise OSError('Could not make directory ' + out_dir)
     try:
-        filename = out_dir + out_file 
+        filename = out_dir + out_file
     except Exception:
         raise TypeError('Appears that out_dir or out_file are not strings')
 
-    segmented_map.save(filename, overwrite=True)
+    try:
+        segmented_map.save(filename, overwrite=True)
+    except Exception:
+        raise TypeError('segmented_map must be a sunpy map')
+
     fits.append(filename, data_map.data)
 
 
@@ -91,7 +96,8 @@ def sav_to_map(filename, field):
     except FileNotFoundError:
         raise FileNotFoundError('Cannot find '+filename)
     except Exception:
-        raise Exception('Data ' + filename + ' does not appear to be in correct .sav format')
+        raise Exception('Data ' + filename + ' does not appear to be in '
+                        + 'correct .sav format')
 
     if field not in data.keys():
         print('Field ' + field + ' is not in file keys ', data.keys())
@@ -151,7 +157,7 @@ def sav_to_numpy(filename, instrument, field):
     return data
 
 
-def segment(data_map, skimage_method, plot_intermed=True):
+def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/'):
     """ Segment optical image of the solar photosphere into tri-value maps
     with 0 = inter-granule, 0.5 = faculae, 1 = granule.
 
@@ -162,8 +168,10 @@ def segment(data_map, skimage_method, plot_intermed=True):
     skimage_method (string): skimage thresholding method - options are 'otsu',
                              'li', 'isodata', 'mean', 'minimum', 'yen',
                              'triangle'
-    plot_intermed (True or False): whether or not to intermediate data product 
+    plot_intermed (True or False): whether or not to intermediate data product
                               image (default True)
+    out_dir (str): Desired directory in which to save intermediate data
+                              product image (if plot_intermed = True)
 
     Returns:
     -------
@@ -197,7 +205,7 @@ def segment(data_map, skimage_method, plot_intermed=True):
     # mark faculae
     segmented_image_markfac = mark_faculae(segmented_image_fixed, data)
 
-    if plot_intermed: 
+    if plot_intermed:
         # show pipeline process
         fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2, 2, figsize=(30, 30))
         s1 = 20
@@ -208,7 +216,7 @@ def segment(data_map, skimage_method, plot_intermed=True):
         plt.colorbar(im0, ax=ax0)
         im1 = ax1.imshow(segmented_image, cmap='gray')
         ax1.set_title('direct ' + skimage_method + ' skimage segmentation',
-                    fontsize=s1)
+                      fontsize=s1)
         plt.colorbar(im1, ax=ax1)
         im2 = ax2.imshow(segmented_image_fixed, cmap='gray')
         ax2.set_title('wrong middles removed', fontsize=s1)
@@ -217,7 +225,7 @@ def segment(data_map, skimage_method, plot_intermed=True):
         ax3.set_title('faculae identified', fontsize=s1)
         plt.colorbar(im3, ax=ax3)
         plt.axis('off')
-        plt.savefig('intermediate_outputs.png')
+        plt.savefig(out_dir+'intermediate_outputs.png')
 
     # convert segmentated image back into SunPy map with original header
     segmented_map = sunpy.map.Map(segmented_image, header)
