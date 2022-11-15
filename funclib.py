@@ -225,6 +225,11 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/'):
         ax3.set_title('faculae identified', fontsize=s1)
         plt.colorbar(im3, ax=ax3)
         plt.axis('off')
+        if not os.path.exists(out_dir):
+            try:
+                os.mkdir(out_dir)
+            except Exception:
+                raise OSError('Could not make directory ' + out_dir)
         plt.savefig(out_dir+'intermediate_outputs.png')
 
     # convert segmentated image back into SunPy map with original header
