@@ -1,6 +1,5 @@
 import scipy
 import scipy.io as sio
-from scipy.io import readsav
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
@@ -16,12 +15,13 @@ import os
 
 
 def open_file(filename):
-    """ Convenience function for catching file read errors.
-        Parameters:
-        ----------
+    """
+    Convenience function for catching file read errors.
+    ----------
+    Parameters:
         filename: (string) Path to file.
-        Returns:
-        -------
+    ----------
+    Returns:
         Nothing
     """
     if not os.path.exists(filename):
@@ -43,20 +43,18 @@ def open_file(filename):
 
 
 def save_to_fits(segmented_map, data_map, out_file, out_dir):
-    """ Save input sunpy map and output segmented sunpy map to fits file
-
-    Parameters:
+    """
+    Save input sunpy map and output segmented sunpy map to fits file
     ----------
-
-    segmented_map (sunpy map): segmented data
-    data_map (sunpy map): input data
-    filename (string): desired name of output fits file
-
+    Parameters:
+        segmented_map (sunpy map): segmented data
+        data_map (sunpy map): input data
+        out_file (str): desired name of output fits file
+        out_dir (str): filepath for the fits file
+    ----------
     Returns:
-    -------
-
-    None: creates fits file with first extension being the segmented map and
-    second extension being the input map
+        None: creates fits file with first extension being the segmented map and
+              second extension being the input map
     """
     if not os.path.exists(out_dir):
         try:
@@ -77,22 +75,19 @@ def save_to_fits(segmented_map, data_map, out_file, out_dir):
 
 
 def sav_to_map(filename, field):
-    """ Read .sav file data into a sunpy map.
-
-    Parameters:
+    """
+    Read .sav file data into a sunpy map.
     ----------
-
-    filename (string): Path to input data file (.sav format)
-    field (string): Field of sav file to access
-
+    Parameters:
+        filename (string): Path to input data file (.sav format)
+        field (string): Field of sav file to access
+    ----------
     Returns:
-    -------
-
-    data: SunPy map containing the data and arbitrary coordinate header
+        data: SunPy map containing the data and arbitrary coordinate header
     """
 
     try:
-        data = readsav(filename)
+        data = sio.readsav(filename)
     except FileNotFoundError:
         raise FileNotFoundError('Cannot find '+filename)
     except Exception:
@@ -119,17 +114,14 @@ def sav_to_map(filename, field):
 
 
 def fits_to_map(filename):
-    """ Read .fits file data into a sunpy map.
-
-    Parameters:
+    """
+    Read .fits file data into a sunpy map.
     ----------
-
-    filename (string): Path to input data file (.fits format)
-
+    Parameters:
+        filename (string): Path to input data file (.fits format)
+    ----------
     Returns:
-    -------
-
-    data: SunPy map containing the data and arbitrary coordinate header
+        data: SunPy map containing the data and arbitrary coordinate header
     """
 
     try:
@@ -156,23 +148,20 @@ def fits_to_map(filename):
 
 
 def sav_to_numpy(filename, instrument, field):
-    """ Read .sav file data into a numpy array.
-
-        Parameters:
-        ----------
-
+    """
+    Read .sav file data into a numpy array.
+    ----------
+    Parameters:
         filename (string): Path to input data file (.sav format)
         instrument (string): The telescope/instrument (ie. IBIS, DKSIST).
-        band (string): Band or data field to read.
-
-        Returns:
-        -------
-
+        field (string): Band or data field to read.
+    ----------
+    Returns:
         data (numpy array): Array of data values.
     """
 
     try:
-        data = readsav(filename)
+        data = sio.readsav(filename)
     except FileNotFoundError:
         raise FileNotFoundError('Cannot find '+filename)
     except Exception:
@@ -194,26 +183,23 @@ def sav_to_numpy(filename, instrument, field):
 
 
 def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/'):
-    """ Segment optical image of the solar photosphere into tri-value maps
+    """
+    Segment optical image of the solar photosphere into tri-value maps
     with 0 = inter-granule, 0.5 = faculae, 1 = granule.
-
-    Parameters:
     ----------
-
-    data_map (SunPy map): SunPy map containing data to segment
-    skimage_method (string): skimage thresholding method - options are 'otsu',
-                             'li', 'isodata', 'mean', 'minimum', 'yen',
-                             'triangle'
-    plot_intermed (True or False): whether or not to intermediate data product
-                              image (default True)
-    out_dir (str): Desired directory in which to save intermediate data
-                              product image (if plot_intermed = True)
-
+    Parameters:
+        data_map (SunPy map): SunPy map containing data to segment
+        skimage_method (string): skimage thresholding method - options are 'otsu',
+                                 'li', 'isodata', 'mean', 'minimum', 'yen',
+                                 'triangle'
+        plot_intermed (True or False): whether or not to intermediate data product
+                                       image (default True)
+        out_dir (str): Desired directory in which to save intermediate data
+                                  product image (if plot_intermed = True)
+    ----------
     Returns:
-    -------
-
-    data_map (SunPy map): SunPy map containing segmentated image (with the
-                          original header)
+        data_map (SunPy map): SunPy map containing segmentated image (with the
+                              original header)
     """
 
     if type(data_map) != sunpy.map.mapbase.GenericMap:
@@ -247,20 +233,25 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/'):
         s1 = 20
         s2 = 26
         fig.suptitle('Intermediate processesing steps ', fontsize=s2)
+
         im0 = ax0.imshow(data/np.max(data))
         ax0.set_title('scaled input image', fontsize=s1)
         plt.colorbar(im0, ax=ax0)
+
         im1 = ax1.imshow(segmented_image, cmap='gray')
         ax1.set_title('direct ' + skimage_method + ' skimage segmentation',
                       fontsize=s1)
         plt.colorbar(im1, ax=ax1)
+
         im2 = ax2.imshow(segmented_image_fixed, cmap='gray')
         ax2.set_title('wrong middles removed', fontsize=s1)
         plt.colorbar(im2, ax=ax2)
+
         im3 = ax3.imshow(segmented_image_markfac, cmap='gray')
         ax3.set_title('faculae identified', fontsize=s1)
         plt.colorbar(im3, ax=ax3)
         plt.axis('off')
+
         if not os.path.exists(out_dir):
             try:
                 os.mkdir(out_dir)
@@ -275,18 +266,15 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/'):
 
 
 def get_threshold(data, method):
-    """ Get the threshold value using given skimage segmentation type.
-
-        Parameters:
-        ----------
-
+    """
+    Get the threshold value using given skimage segmentation type.
+    ----------
+    Parameters:
         data (numpy array): data to threshold
         method (string): skimage thresholding method - options are 'otsu',
                         'li', 'isodata', 'mean', 'minimum', 'yen', 'triangle'
-
-        Returns:
-        -------
-
+    ----------
+    Returns:
         threshold (float): threshold
     """
 
@@ -315,20 +303,17 @@ def get_threshold(data, method):
 
 
 def remove_middles(segmented_image):
-    """ Remove the erronous idenfication of intergranule material in the
-        middle of granules that pure threshold segmentation produces.
-
-        Parameters:
-        ----------
-
+    """
+    Remove the erronous idenfication of intergranule material in the
+    middle of granules that pure threshold segmentation produces.
+    ----------
+    Parameters:
         segmented_image (numpy array): the segmented image containing
-        incorrect middles
-
-        Returns:
-        -------
-
+                                       incorrect middles
+    ----------
+    Returns:
         segmented_image_fixed (numpy array): the segmented image without
-        incorrect middles
+                                             incorrect middles
     """
 
     if len(np.unique(segmented_image)) > 2:
@@ -350,20 +335,17 @@ def remove_middles(segmented_image):
 
 
 def mark_faculae(segmented_image, data):
-    """ Mark faculae seperatly from granules - give them a value of 0.5 not 1
-
-        Parameters:
-        ----------
-
+    """
+    Mark faculae seperatly from granules - give them a value of 0.5 not 1
+    ----------
+    Parameters:
         data (numpy array): the original flux values
         segmented_image (numpy array): the segmented image containing
-        incorrect middles
-
-        Returns:
-        -------
-
+                                       incorrect middles
+    ----------
+    Returns:
         segmented_image_fixed (numpy array): the segmented image with faculae
-        marked as 0.5
+                                             marked as 0.5
     """
 
     if len(np.unique(segmented_image)) > 2:
