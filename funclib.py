@@ -369,3 +369,11 @@ def mark_faculae(segmented_image, data):
                     segmented_image_fixed[mask == 1] = 0.5
 
     return segmented_image_fixed
+
+def find_multiple(filepath):
+    files_to_be_segmented = ['']
+    for root, dir, file in os.walk(filepath):
+        if file.endswith('.fits') or file.endswith('.sav'):
+            files_to_be_segmented += file
+    return files_to_be_segmented
+
