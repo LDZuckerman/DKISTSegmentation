@@ -233,20 +233,25 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/'):
         s1 = 20
         s2 = 26
         fig.suptitle('Intermediate processesing steps ', fontsize=s2)
+
         im0 = ax0.imshow(data/np.max(data))
         ax0.set_title('scaled input image', fontsize=s1)
         plt.colorbar(im0, ax=ax0)
+
         im1 = ax1.imshow(segmented_image, cmap='gray')
         ax1.set_title('direct ' + skimage_method + ' skimage segmentation',
                       fontsize=s1)
         plt.colorbar(im1, ax=ax1)
+
         im2 = ax2.imshow(segmented_image_fixed, cmap='gray')
         ax2.set_title('wrong middles removed', fontsize=s1)
         plt.colorbar(im2, ax=ax2)
+
         im3 = ax3.imshow(segmented_image_markfac, cmap='gray')
         ax3.set_title('faculae identified', fontsize=s1)
         plt.colorbar(im3, ax=ax3)
         plt.axis('off')
+
         if not os.path.exists(out_dir):
             try:
                 os.mkdir(out_dir)
