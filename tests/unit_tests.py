@@ -19,7 +19,7 @@ class TestUtils(unittest.TestCase):
 
         """ Set up for unit testing by creating toy data
         """
-        cls.testfile = 'data/IBIS.granulation.aligned.25Apr2019.seq56.sav'
+        cls.ibis_testfile = 'data/IBIS.granulation.aligned.25Apr2019.seq56.sav'
         cls.dkist_testfile = 'data/dkist.cont789nm.scaled.fits'
         cls.test_instrument = 'IBIS'
         cls.dkist_instrument = 'DKIST'
@@ -32,7 +32,7 @@ class TestUtils(unittest.TestCase):
         """ Tear down unit testing toy data
         """
 
-        cls.testfile = None
+        cls.ibis_testfile = None
         cls.test_instrument = None
         cls.test_method = None
         cls.test_band = None
@@ -44,7 +44,7 @@ class TestUtils(unittest.TestCase):
 
         # -------- positive tests -------- :
         # check that the returned type is as expected
-        returned_map = funclib.sav_to_map(self.testfile, self.test_band)
+        returned_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
         test_type = type(returned_map)
         self.assertEqual(test_type, sunpy.map.mapbase.GenericMap)
         # check that returned data is not empty
@@ -90,7 +90,7 @@ class TestUtils(unittest.TestCase):
         """
 
         # -------- positive tests -------- :
-        returned_array = funclib.sav_to_numpy(self.testfile,
+        returned_array = funclib.sav_to_numpy(self.ibis_testfile,
                                               self.test_instrument,
                                               self.test_band)
         # check that correct type is returned
@@ -108,9 +108,9 @@ class TestUtils(unittest.TestCase):
         # check that errors are raised for incorrect inputs
         self.assertRaises(Exception, funclib.sav_to_numpy, 'ABC.txt',
                           self.test_instrument, self.test_band)
-        self.assertRaises(Exception, funclib.sav_to_numpy, self.testfile,
+        self.assertRaises(Exception, funclib.sav_to_numpy, self.ibis_testfile,
                           'telescope', self.test_band)
-        self.assertRaises(Exception, funclib.sav_to_numpy, self.testfile,
+        self.assertRaises(Exception, funclib.sav_to_numpy, self.ibis_testfile,
                           self.test_instrument, 'visible')
 
     def test_segment(self):
@@ -119,7 +119,7 @@ class TestUtils(unittest.TestCase):
 
         # -------- positive tests -------- :
         # check that the returned type is correct
-        data_map = funclib.sav_to_map(self.testfile, self.test_band)
+        data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
         segmented = funclib.segment(data_map, self.test_method)
         test_type = type(segmented)
         self.assertEqual(test_type, sunpy.map.mapbase.GenericMap)
@@ -143,7 +143,7 @@ class TestUtils(unittest.TestCase):
         # ------ error raising tests ------ :
         self.assertRaises(TypeError, funclib.segment, data_map, 'skimage')
         self.assertRaises(TypeError, funclib.segment,
-                          funclib.sav_to_numpy(self.testfile,
+                          funclib.sav_to_numpy(self.ibis_testfile,
                                                self.test_instrument,
                                                self.test_band), 'skimage')
 
@@ -176,7 +176,7 @@ class TestUtils(unittest.TestCase):
         """
 
         # -------- positive tests -------- :
-        data_map = funclib.sav_to_map(self.testfile, self.test_band)
+        data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
         thresholded = np.uint8(data_map.data > np.nanmedian(data_map.data))
         # check that returned array is not empty
         self.assertTrue(np.size(thresholded) > 0)
@@ -201,7 +201,7 @@ class TestUtils(unittest.TestCase):
         """
 
         # -------- positive tests -------- :
-        data_map = funclib.sav_to_map(self.testfile, self.test_band)
+        data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
         thresholded = np.uint8(data_map.data > np.nanmedian(data_map.data))
         faculae_marked = funclib.mark_faculae(thresholded, data_map.data)
         # check that the correct dimensions are returned
@@ -223,7 +223,7 @@ class TestUtils(unittest.TestCase):
         """ Unit tests for save_to_fits() function
         """
 
-        data_map = funclib.sav_to_map(self.testfile, self.test_band)
+        data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
         segmented_map = funclib.segment(data_map, self.test_method)
         funclib.save_to_fits(segmented_map, data_map,
                              'test_output.fits',
@@ -261,3 +261,27 @@ class TestUtils(unittest.TestCase):
     def test_find_files(self):
         self.assertTrue(True)
         self.assertFalse(False)
+        
+
+
+    def overplot_velocities(self):
+        """ Unit tests for overplot_velocities() function
+        """
+
+        data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
+        segmented_map = funclib.segment(data_map, self.test_method)
+        out_file_path = 'outputs/velocity_comparison.png'
+        funclib.overplot_velocities(segmented_map, out_file_path)
+
+        # positive tests
+        # check that produces output plot in expected location
+        self.assertTrue(os.path.exists(out_file_path))
+
+        # negtaive tests
+        # check that
+        self.assertFalse(not os.path.exists(out_file_path))
+        
+        # error raising tests
+        self.assertRaises(Exception, funclib.overplot_velocities, segmented_map, 2)
+        self.assertRaises(Exception, funclib.overplot_velocities, [[1,2,3],[4,5,6]], out_file_path)
+
