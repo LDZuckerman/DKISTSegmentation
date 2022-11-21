@@ -3,15 +3,16 @@ import scipy.io as sio
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
-import skimage
-import sunpy
-import sunpy.map
-from sunpy.coordinates import frames
+# import skimage
+# import sunpy
+# import sunpy.map
+# from sunpy.coordinates import frames
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
 import astropy.io.fits as fits
 import os
+import glob
 
 
 def open_file(filename):
@@ -89,7 +90,7 @@ def sav_to_map(filename, field):
     try:
         data = sio.readsav(filename)
     except FileNotFoundError:
-        raise FileNotFoundError('Cannot find '+filename)
+        raise FileNotFoundError('Cannot find ' + filename)
     except Exception:
         raise Exception('Data ' + filename + ' does not appear to be in '
                         + 'correct .sav format')
@@ -98,15 +99,15 @@ def sav_to_map(filename, field):
         raise Exception('Field ' + field +
                         ' is not in file keys ', data.keys())
 
-    fake_coord = SkyCoord(0*u.arcsec, 0*u.arcsec, obstime='2013-10-28 08:24',
+    fake_coord = SkyCoord(0 * u.arcsec, 0 * u.arcsec, obstime='2013-10-28 08:24',
                           observer='earth', frame=frames.Helioprojective)
     fake_header = sunpy.map.make_fitswcs_header(data=np.empty((512, 512)),
                                                 coordinate=fake_coord,
-                                                reference_pixel=[0, 0]*u.pixel,
-                                                scale=[2, 2]*u.arcsec/u.pixel,
+                                                reference_pixel=[0, 0] * u.pixel,
+                                                scale=[2, 2] * u.arcsec / u.pixel,
                                                 telescope='Fake Telescope',
                                                 instrument='Fake Instrument',
-                                                wavelength=1000*u.angstrom)
+                                                wavelength=1000 * u.angstrom)
 
     data_map = sunpy.map.Map(data[field], fake_header)
 
@@ -128,19 +129,19 @@ def fits_to_map(filename):
         hdu = fits.open(filename)
         data = hdu[0].data
     except FileNotFoundError:
-        raise FileNotFoundError('Cannot find '+filename)
+        raise FileNotFoundError('Cannot find ' + filename)
     except Exception:
         raise Exception('Data does not appear to be in correct .fits format')
 
-    fake_coord = SkyCoord(0*u.arcsec, 0*u.arcsec, obstime='2013-10-28 08:24',
+    fake_coord = SkyCoord(0 * u.arcsec, 0 * u.arcsec, obstime='2013-10-28 08:24',
                           observer='earth', frame=frames.Helioprojective)
     fake_header = sunpy.map.make_fitswcs_header(data=np.empty((512, 512)),
                                                 coordinate=fake_coord,
-                                                reference_pixel=[0, 0]*u.pixel,
-                                                scale=[2, 2]*u.arcsec/u.pixel,
+                                                reference_pixel=[0, 0] * u.pixel,
+                                                scale=[2, 2] * u.arcsec / u.pixel,
                                                 telescope='Fake Telescope',
                                                 instrument='Fake Instrument',
-                                                wavelength=1000*u.angstrom)
+                                                wavelength=1000 * u.angstrom)
 
     data_map = sunpy.map.Map(data, fake_header)
 
@@ -163,7 +164,7 @@ def sav_to_numpy(filename, instrument, field):
     try:
         data = sio.readsav(filename)
     except FileNotFoundError:
-        raise FileNotFoundError('Cannot find '+filename)
+        raise FileNotFoundError('Cannot find ' + filename)
     except Exception:
         raise Exception('Data does not appear to be in correct .sav format')
 
@@ -234,7 +235,7 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/'):
         s2 = 26
         fig.suptitle('Intermediate processesing steps ', fontsize=s2)
 
-        im0 = ax0.imshow(data/np.max(data))
+        im0 = ax0.imshow(data / np.max(data))
         ax0.set_title('scaled input image', fontsize=s1)
         plt.colorbar(im0, ax=ax0)
 
@@ -257,7 +258,7 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/'):
                 os.mkdir(out_dir)
             except Exception:
                 raise OSError('Could not make directory ' + out_dir)
-        plt.savefig(out_dir+'intermediate_outputs.png')
+        plt.savefig(out_dir + 'intermediate_outputs.png')
 
     # convert segmentated image back into SunPy map with original header
     segmented_map = sunpy.map.Map(segmented_image, header)
@@ -320,7 +321,7 @@ def remove_middles(segmented_image):
         raise ValueError('segmented_image must have only values of 1 and 0')
 
     segmented_image_fixed = np.copy(segmented_image)
-    labeled_seg = skimage.measure.label(segmented_image+1, connectivity=2)
+    labeled_seg = skimage.measure.label(segmented_image + 1, connectivity=2)
     values = np.unique(labeled_seg)
     for value in values:
         mask = np.zeros_like(segmented_image)
@@ -353,7 +354,7 @@ def mark_faculae(segmented_image, data):
 
     segmented_image = segmented_image  # [80:90, 130:140]
     segmented_image_fixed = np.copy(segmented_image.astype(float))
-    labeled_seg = skimage.measure.label(segmented_image+1, connectivity=2)
+    labeled_seg = skimage.measure.label(segmented_image + 1, connectivity=2)
     values = np.unique(labeled_seg)
     for value in values:
         mask = np.zeros_like(segmented_image)
@@ -365,15 +366,30 @@ def mark_faculae(segmented_image, data):
             # check that region is small [bad criteria, change later on]
             if region_size < 20:
                 # check that avg flux very high
-                if tot_flux/region_size > 4000:
+                if tot_flux / region_size > 4000:
                     segmented_image_fixed[mask == 1] = 0.5
 
     return segmented_image_fixed
 
-def find_multiple(filepath):
-    files_to_be_segmented = ['']
-    for root, dir, file in os.walk(filepath):
+
+def find_data(filepath):
+    """
+    Given a master filepath, traverses through all embeded directories and files,
+    and returns a list of all the files that end in .fits or .sav.
+
+    Useful for raw data, which is usually in nested directory structures.
+    ----------
+    Parameters:
+        filepath (string): the filepath to search for .fits or .sav files
+    ----------
+    Returns:
+        files_to_be_segmented (list of strings): the list of files
+                                                 to be segmented.
+    """
+    files_to_be_segmented = []
+    files = glob.glob(filepath + '**', recursive = True)
+    for file in files:
         if file.endswith('.fits') or file.endswith('.sav'):
-            files_to_be_segmented += file
+            files_to_be_segmented.append(file)
     return files_to_be_segmented
 

@@ -257,3 +257,7 @@ class TestUtils(unittest.TestCase):
                          4)
 
         os.remove('output/test_output.fits')
+
+    def test_find_files(self):
+        self.assertTrue(True)
+        self.assertFalse(False)
