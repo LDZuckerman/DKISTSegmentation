@@ -3,10 +3,10 @@ import scipy.io as sio
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
-# import skimage
-# import sunpy
-# import sunpy.map
-# from sunpy.coordinates import frames
+import skimage
+import sunpy
+import sunpy.map
+from sunpy.coordinates import frames
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
