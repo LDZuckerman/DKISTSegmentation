@@ -8,7 +8,8 @@ def main():
     parser.add_argument('--filepath_to_data',
                         dest='filepath_to_data',
                         type=str,
-                        help='filepath to directory containing data to be segmented.',
+                        help='filepath to directory containing data to ' +
+                        'be segmented.',
                         required=True)
     parser.add_argument('--skimage_method', dest='skimage_method',
                         type=str,
