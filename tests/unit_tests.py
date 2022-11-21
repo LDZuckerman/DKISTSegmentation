@@ -109,7 +109,7 @@ class TestUtils(unittest.TestCase):
         self.assertRaises(Exception, funclib.sav_to_numpy, 'ABC.txt',
                           self.test_instrument, self.test_band)
         self.assertRaises(Exception, funclib.sav_to_numpy, self.testfile,
-                         'telescope', self.test_band)
+                          'telescope', self.test_band)
         self.assertRaises(Exception, funclib.sav_to_numpy, self.testfile,
                           self.test_instrument, 'visible')
 
@@ -167,7 +167,7 @@ class TestUtils(unittest.TestCase):
 
         # ------ error raising tests ------ :
         self.assertRaises(ValueError, funclib.get_threshold, test_arr1,
-                         'banana')
+                          'banana')
         self.assertRaises(ValueError, funclib.get_threshold, [],
                           self.test_method)
 
@@ -247,13 +247,13 @@ class TestUtils(unittest.TestCase):
         self.assertRaises(TypeError,
                           funclib.save_to_fits,
                           data_map.data, segmented_map,
-                         'test_output.fits',
-                         'output/')
+                          'test_output.fits',
+                          'output/')
         self.assertRaises(TypeError,
                           funclib.save_to_fits,
                           data_map,
                           segmented_map,
-                         'test_output.fits',
+                          'test_output.fits',
                           4)
 
         os.remove('output/test_output.fits')

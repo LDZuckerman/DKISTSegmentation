@@ -43,7 +43,6 @@ def main():
     for data in data_to_be_segmented:
         input_file = data
 
-
         # read data into map to mimic use within SunPy
         data_map = funclib.sav_to_map(input_file, 'rosa_gband')
 

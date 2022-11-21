@@ -7,6 +7,7 @@ import skimage
 import sunpy
 import sunpy.map
 from sunpy.coordinates import frames
+from sunpy.map import make_fitswcs_header
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
@@ -54,8 +55,8 @@ def save_to_fits(segmented_map, data_map, out_file, out_dir):
         out_dir (str): filepath for the fits file
     ----------
     Returns:
-        None: creates fits file with first extension being the segmented map and
-              second extension being the input map
+        None: creates fits file with first extension being the segmented map
+              and second extension being the input map
     """
     if not os.path.exists(out_dir):
         try:
@@ -99,15 +100,16 @@ def sav_to_map(filename, field):
         raise Exception('Field ' + field +
                         ' is not in file keys ', data.keys())
 
-    fake_coord = SkyCoord(0 * u.arcsec, 0 * u.arcsec, obstime='2013-10-28 08:24',
+    fake_coord = SkyCoord(0*u.arcsec, 0*u.arcsec,
+                          obstime='2013-10-28 08:24',
                           observer='earth', frame=frames.Helioprojective)
-    fake_header = sunpy.map.make_fitswcs_header(data=np.empty((512, 512)),
-                                                coordinate=fake_coord,
-                                                reference_pixel=[0, 0] * u.pixel,
-                                                scale=[2, 2] * u.arcsec / u.pixel,
-                                                telescope='Fake Telescope',
-                                                instrument='Fake Instrument',
-                                                wavelength=1000 * u.angstrom)
+    fake_header = make_fitswcs_header(data=np.empty((512, 512)),
+                                      coordinate=fake_coord,
+                                      reference_pixel=[0, 0]*u.pixel,
+                                      scale=[2, 2]*u.arcsec / u.pixel,
+                                      telescope='Fake Telescope',
+                                      instrument='Fake Instrument',
+                                      wavelength=1000*u.angstrom)
 
     data_map = sunpy.map.Map(data[field], fake_header)
 
@@ -133,15 +135,16 @@ def fits_to_map(filename):
     except Exception:
         raise Exception('Data does not appear to be in correct .fits format')
 
-    fake_coord = SkyCoord(0 * u.arcsec, 0 * u.arcsec, obstime='2013-10-28 08:24',
+    fake_coord = SkyCoord(0 * u.arcsec, 0 * u.arcsec,
+                          obstime='2013-10-28 08:24',
                           observer='earth', frame=frames.Helioprojective)
-    fake_header = sunpy.map.make_fitswcs_header(data=np.empty((512, 512)),
-                                                coordinate=fake_coord,
-                                                reference_pixel=[0, 0] * u.pixel,
-                                                scale=[2, 2] * u.arcsec / u.pixel,
-                                                telescope='Fake Telescope',
-                                                instrument='Fake Instrument',
-                                                wavelength=1000 * u.angstrom)
+    fake_header = make_fitswcs_header(data=np.empty((512, 512)),
+                                      coordinate=fake_coord,
+                                      reference_pixel=[0, 0]*u.pixel,
+                                      scale=[2, 2]*u.arcsec / u.pixel,
+                                      telescope='Fake Telescope',
+                                      instrument='Fake Instrument',
+                                      wavelength=1000*u.angstrom)
 
     data_map = sunpy.map.Map(data, fake_header)
 
@@ -190,11 +193,11 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/'):
     ----------
     Parameters:
         data_map (SunPy map): SunPy map containing data to segment
-        skimage_method (string): skimage thresholding method - options are 'otsu',
-                                 'li', 'isodata', 'mean', 'minimum', 'yen',
-                                 'triangle'
-        plot_intermed (True or False): whether or not to intermediate data product
-                                       image (default True)
+        skimage_method (string): skimage thresholding method - options are
+                                 'otsu', 'li', 'isodata', 'mean', 'minimum',
+                                  'yen', 'triangle'
+        plot_intermed (True or False): whether or not to intermediate data
+                                       product image (default True)
         out_dir (str): Desired directory in which to save intermediate data
                                   product image (if plot_intermed = True)
     ----------
@@ -374,8 +377,8 @@ def mark_faculae(segmented_image, data):
 
 def find_data(filepath):
     """
-    Given a master filepath, traverses through all embeded directories and files,
-    and returns a list of all the files that end in .fits or .sav.
+    Given a master filepath, traverses through all embeded directories and
+    files, and returns a list of all the files that end in .fits or .sav.
 
     Useful for raw data, which is usually in nested directory structures.
     ----------
@@ -387,9 +390,8 @@ def find_data(filepath):
                                                  to be segmented.
     """
     files_to_be_segmented = []
-    files = glob.glob(filepath + '**', recursive = True)
+    files = glob.glob(filepath + '**', recursive=True)
     for file in files:
         if file.endswith('.fits') or file.endswith('.sav'):
             files_to_be_segmented.append(file)
     return files_to_be_segmented
-
