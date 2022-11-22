@@ -261,8 +261,6 @@ class TestUtils(unittest.TestCase):
     def test_find_files(self):
         self.assertTrue(True)
         self.assertFalse(False)
-        
-
 
     def overplot_velocities(self):
         """ Unit tests for overplot_velocities() function
@@ -270,18 +268,20 @@ class TestUtils(unittest.TestCase):
 
         data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
         segmented_map = funclib.segment(data_map, self.test_method)
-        out_file_path = 'outputs/velocity_comparison.png'
-        funclib.overplot_velocities(segmented_map, out_file_path)
+        out_file_path = 'test_outputs/velocity_comparison.png'
+        funclib.overplot_velocities(segmented_map, self.ibis_testsfile, out_file_path)
 
-        # positive tests
+        # -------- positive tests -------- :
         # check that produces output plot in expected location
         self.assertTrue(os.path.exists(out_file_path))
 
-        # negtaive tests
+        # -------- negative tests -------- :
         # check that
         self.assertFalse(not os.path.exists(out_file_path))
         
-        # error raising tests
-        self.assertRaises(Exception, funclib.overplot_velocities, segmented_map, 2)
-        self.assertRaises(Exception, funclib.overplot_velocities, [[1,2,3],[4,5,6]], out_file_path)
+        # ------ error raising tests ------ :
+        self.assertRaises(Exception, funclib.overplot_velocities,
+                          segmented_map, cls.dkist_testfile, out_file_path)
+        self.assertRaises(Exception, funclib.overplot_velocities,
+                          [[1,2,3],[4,5,6]], out_file_path)
 
