@@ -409,7 +409,7 @@ def overplot_velocities(seg_map, input_file, output_path):
     Returns:
         None; saves outplot plot
     """
-    
+
     print(input_file)
     if input_file.endswith('.sav'):
         file = sio.readsav(input_file)
