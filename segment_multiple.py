@@ -32,7 +32,7 @@ def main():
                         help='(Optional) Desired name of output image file '
                              + 'containing segmented contours overplotted '
                              + 'on velocity data.',
-                        default=False,
+                        default=None,
                         required=False)
     parser.add_argument('--out_dir',
                         type=str,
