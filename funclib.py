@@ -9,6 +9,7 @@ import sunpy.map
 from sunpy.coordinates import frames
 from sunpy.map import make_fitswcs_header
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import numpy as np
 import sys
 import astropy.io.fits as fits
@@ -264,7 +265,7 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/'):
         plt.savefig(out_dir + 'intermediate_outputs.png')
 
     # convert segmentated image back into SunPy map with original header
-    segmented_map = sunpy.map.Map(segmented_image, header)
+    segmented_map = sunpy.map.Map(segmented_image_markfac, header)
 
     return segmented_map
 
@@ -395,3 +396,41 @@ def find_data(filepath):
         if file.endswith('.fits') or file.endswith('.sav'):
             files_to_be_segmented.append(file)
     return files_to_be_segmented
+
+
+def overplot_velocities(seg_map, input_file, output_path):
+    """
+    Overplot segmentation contours on velocity data as a check on accuracy.
+    ----------
+    Parameters:
+        seg_map (sunpy map): Sunpy map containing segmented data
+        output_path (string): path to save output plot
+    ----------
+    Returns:
+        None; saves outplot plot
+    """
+    
+    print(input_file)
+    if input_file.endswith('.sav'):
+        file = sio.readsav(input_file)
+        velocities = file['velocity_cln']
+    else:
+        raise Exception('Velocity data only reported for IBIS datasets.')
+
+    segmented_data = seg_map.data
+
+    plt.figure(figsize=[8, 8])
+    plt.imshow(velocities)
+    plt.colorbar(label='Normalized radial velocity')
+    plt.contour(segmented_data, [2], colors='black')
+    ax = plt.gca()
+    # the next two lines add a legend entry for the contours
+    patches = [Line2D([0], [0],
+                      color='black',
+                      label='Segmentation \n contours',
+                      linewidth=1)]
+    plt.legend(handles=patches,
+               bbox_to_anchor=(0.65, 0.10),
+               loc=2, borderaxespad=0.)
+
+    plt.savefig(output_path)
