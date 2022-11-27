@@ -392,4 +392,3 @@ def find_data(filepath):
         if file.endswith('.fits') or file.endswith('.sav'):
             files_to_be_segmented.append(file)
     return files_to_be_segmented
-
