@@ -1,5 +1,4 @@
 import sys
-
 sys.path.append('..')  # nopep8
 import unittest
 import funclib
@@ -17,6 +16,7 @@ class TestUtils(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+
         """ Set up for unit testing by creating toy data
         """
         cls.testfile = 'data/IBIS.granulation.aligned.25Apr2019.seq56.sav'
@@ -28,6 +28,7 @@ class TestUtils(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+
         """ Tear down unit testing toy data
         """
 
@@ -37,6 +38,7 @@ class TestUtils(unittest.TestCase):
         cls.test_band = None
 
     def test_sav_to_map(self):
+
         """ Unit tests for sav_to_map() function
         """
 
@@ -60,6 +62,7 @@ class TestUtils(unittest.TestCase):
         self.assertRaises(Exception, funclib.sav_to_map, '', self.test_band)
 
     def test_fits_to_map(self):
+
         """ Unit tests for fits_to_map() function
         """
 
@@ -82,6 +85,7 @@ class TestUtils(unittest.TestCase):
         self.assertRaises(Exception, funclib.fits_to_map, '')
 
     def test_sav_to_numpy(self):
+
         """ Unit tests for sav_to_numpy() function
         """
 
@@ -105,7 +109,7 @@ class TestUtils(unittest.TestCase):
         self.assertRaises(Exception, funclib.sav_to_numpy, 'ABC.txt',
                           self.test_instrument, self.test_band)
         self.assertRaises(Exception, funclib.sav_to_numpy, self.testfile,
-                          'telescope', self.test_band)
+                         'telescope', self.test_band)
         self.assertRaises(Exception, funclib.sav_to_numpy, self.testfile,
                           self.test_instrument, 'visible')
 
@@ -163,7 +167,7 @@ class TestUtils(unittest.TestCase):
 
         # ------ error raising tests ------ :
         self.assertRaises(ValueError, funclib.get_threshold, test_arr1,
-                          'banana')
+                         'banana')
         self.assertRaises(ValueError, funclib.get_threshold, [],
                           self.test_method)
 
@@ -243,13 +247,13 @@ class TestUtils(unittest.TestCase):
         self.assertRaises(TypeError,
                           funclib.save_to_fits,
                           data_map.data, segmented_map,
-                          'test_output.fits',
-                          'output/')
+                         'test_output.fits',
+                         'output/')
         self.assertRaises(TypeError,
                           funclib.save_to_fits,
                           data_map,
                           segmented_map,
-                          'test_output.fits',
+                         'test_output.fits',
                           4)
 
         os.remove('output/test_output.fits')
