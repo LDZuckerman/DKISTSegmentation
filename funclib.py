@@ -12,6 +12,7 @@ import sunpy
 import sunpy.map
 from astropy.coordinates import SkyCoord
 from sunpy.coordinates import frames
+from sklearn.cluster import KMeans
 
 
 def open_file(filename):
@@ -400,3 +401,51 @@ def find_data(filepath):
         if file.endswith('.fits') or file.endswith('.sav'):
             files_to_be_segmented.append(file)
     return files_to_be_segmented
+
+
+def kmeans_cluster(data, llambda_axis=-1):
+    """kmeans clustering: uses a kmeans algorithm to cluster data,
+       in order to independently cross correlate the skimage clustering method
+        ----------
+       Parameters:
+            data (numpy array): data to be clustered
+            llambda_axis (int): index for wavelength, -1 if scalar array.
+        ----------
+        Returns:
+            labels (numpy array): an array of labels, with 0 = granules,
+                                  2 = intergranules, 1 = in-between.
+            """
+
+    if llambda_axis not in [-1, 2]:
+        raise Exception('Wrong data shape. \
+        (either scalar or (x, y, llambda) )')
+    n_clusters = 3
+    n_init = 1000
+    x_size = np.shape(data)[0]
+    y_size = np.shape(data)[1]
+    if llambda_axis == -1:  # a scalar array:
+        data_flat = np.reshape(data, (x_size * y_size, 1))  # because Kmeans can only cluster a vector
+        labels_flat = Kmeans(n_clusters).fit(data_flat).labels_
+        labels = np.reshape(labels_flat, (x_size, y_size))
+    else:
+        llambda_size = np.shape(data)[llambda_axis]
+        data = np.reshape(data, (x_size * y_size, llambda_size))
+        labels = np.reshape(Kmeans(n_clusters, n_init).fit(data), (x_size, y_size))
+
+    # now, making granules 0, btwn 1, intergranules 2:
+
+    group0_mean = np.mean(data[labels == 0])
+    group1_mean = np.mean(data[labels == 1])
+    group2_mean = np.mean(data[labels == 2])
+    print([group0_mean, group1_mean, group2_mean])
+
+    max_index = np.argmax([group0_mean, group1_mean, group2_mean])  # granules
+    min_index = np.argmin([group0_mean, group1_mean, group2_mean])  # intergranules
+    print(max_index, min_index)
+
+    return_labels = np.ones(labels.shape)
+
+    return_labels[[labels[:, :] == max_index][0]] -= 1
+    return_labels[[labels[:, :] == min_index][0]] += 1
+
+    return return_labels
