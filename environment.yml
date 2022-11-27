@@ -5,9 +5,6 @@ channels:
 dependencies:
   - numpy
   - pycodestyle
-  - matplotlib
   - scipy
   - sunpy
-  - scikit-image
   - astropy
-  - glob
