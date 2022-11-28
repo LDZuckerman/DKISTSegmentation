@@ -440,12 +440,14 @@ def kmeans_cluster(data, llambda_axis=-1):
     group2_mean = np.mean(data[labels == 2])
     print([group0_mean, group1_mean, group2_mean])
 
+    # granules
     max_index = np.argmax([group0_mean,
                            group1_mean,
-                           group2_mean])  # granules
+                           group2_mean])
+    # intergranules
     min_index = np.argmin({group0_mean,
                            group1_mean,
-                           group2_mean})  # intergranules
+                           group2_mean})
     print(max_index, min_index)
 
     return_labels = np.ones(labels.shape)
