@@ -4,6 +4,8 @@ import os
 import astropy.io.fits as fits
 import astropy.units as u
 import matplotlib.pyplot as plt
+import matplotlib.lines as lines
+import matplotlib.patheffects as mpe
 import numpy as np
 import scipy
 import scipy.io as sio
@@ -238,28 +240,37 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/',
 
     if plot_intermed:
         # show pipeline process
-        fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2, 2, figsize=(30, 30))
-        s1 = 20
-        s2 = 26
-        fig.suptitle('Intermediate processesing steps ', fontsize=s2)
+        fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2, 2, figsize=(15, 15))
+        s1 = 18
+        s2 = 24
+        fig.suptitle('Intermediate Processesing Steps \n', fontsize=s2)
 
-        im0 = ax0.imshow(data / np.max(data))
-        ax0.set_title('scaled input image', fontsize=s1)
-        plt.colorbar(im0, ax=ax0)
+        im0 = ax0.imshow(data / np.max(data), origin='lower')
+        ax0.set_title('scaled Intensity Data', fontsize=s1)
+        plt.colorbar(im0, ax=ax0, shrink=0.8)
 
-        im1 = ax1.imshow(segmented_image, cmap='gray')
-        ax1.set_title('direct ' + skimage_method + ' skimage segmentation',
-                      fontsize=s1)
-        plt.colorbar(im1, ax=ax1)
+        im1 = ax1.imshow(segmented_image, cmap='gray', origin='lower')
+        ax1.set_title('Initial Thresholding', fontsize=s1)
+        plt.colorbar(im1, ax=ax1, shrink=0.8)
 
-        im2 = ax2.imshow(segmented_image_fixed, cmap='gray')
-        ax2.set_title('wrong middles removed', fontsize=s1)
-        plt.colorbar(im2, ax=ax2)
+        im2 = ax2.imshow(segmented_image_fixed, cmap='gray', origin='lower')
+        ax2.set_title('Extraneous IG Material Removed', fontsize=s1)
+        plt.colorbar(im2, ax=ax2, shrink=0.8)
 
-        im3 = ax3.imshow(segmented_image_markfac, cmap='gray')
-        ax3.set_title('faculae identified', fontsize=s1)
-        plt.colorbar(im3, ax=ax3)
-        plt.axis('off')
+        im3 = ax3.imshow(segmented_image_markfac, cmap='gray', origin='lower')
+        ax3.set_title('Final Segmentation', fontsize=s1)
+        #ax3.set_title('Faculae Identified', fontsize=s1)
+        plt.colorbar(im3, ax=ax3, shrink=0.8)
+        
+        plt.tight_layout()
+
+        outline=mpe.withStroke(linewidth=5, foreground='black')
+        custom_lines = [lines.Line2D([0], [0], color='white', lw=4, path_effects=[outline]),
+                lines.Line2D([0], [0], color='black', lw=4),
+                lines.Line2D([0], [0], color='grey', lw=4)]
+        legax = plt.axes([0.1, 0.1, 0.8, 0.85], alpha=0)
+        legax.axis('off')
+        legax.legend(custom_lines, ['Granule', 'Intergranule','Faculae'], loc ='upper center', ncol=3, fontsize='x-large')
 
         if not os.path.exists(out_dir):
             try:
