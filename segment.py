@@ -42,9 +42,8 @@ def main():
     args = parser.parse_args()
     skimage_method = args.skimage_method
     input_file = args.input_file
-    plot_intermed = args.plot_intermed
     out_dir = args.out_dir
-    vel_comparison_file = args.vel_comparison_file
+    plot_intermed = args.plot_intermed
 
     # read data into map to mimic use within SunPy
     if input_file.endswith('.sav'):
@@ -52,30 +51,36 @@ def main():
     if input_file.endswith('.fits'):
         data_map = funclib.fits_to_map(input_file)
 
+    # check for res flags
+    if "dkist" in input_file.lower():
+        res = "DKIST"
+    elif "ibis" in input_file.lower():
+        res = "IBIS"
+    else:
+        print('Currently file name must contain "dkist" or "ibis", for ' +
+              'proper faculae detection. This will be updated in a later ' +
+              'verions. Defaulting to DKIST.')
+        res = "DKIST"
+
     # apply segmentation pipeline
     segmented_map = funclib.segment(data_map,
                                     skimage_method,
                                     plot_intermed,
                                     out_dir,
-                                    res='DKIST')
+                                    res)
 
     # create a visual comparison against velocity data
-    if vel_comparison_file is not None:
+    if args.vel_comparison_file is not None:
         funclib.overplot_velocities(segmented_map,
                                     input_file,
-                                    out_dir + '/' + vel_comparison_file)
+                                    out_dir + '/' + args.vel_comparison_file)
 
     # save map as fits file
     if args.out_file is not None:
         funclib.save_to_fits(segmented_map,
                              data_map,
                              args.out_file,
-                             args.out_dir)
-    # check out put via kmeans:
-    # still working on IBIS data:
-    if input_file.endswith('.fits'):
-        kmeans_labels = funclib.kmeans_cluster(data_map, llambda_axis=-1)
-        funclib.cross_correlation(segmented_map, kmeans_labels)
+                             out_dir)
 
 
 if __name__ == "__main__":

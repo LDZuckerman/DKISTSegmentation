@@ -204,12 +204,15 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/',
     Parameters:
         data_map (SunPy map): SunPy map containing data to segment
         skimage_method (string): skimage thresholding method -
-                                 options are 'otsu', 'li', 'isodata',
-                                  'mean', 'minimum', 'yen', 'triangle'
+                                options are 'otsu', 'li', 'isodata',
+                                'mean', 'minimum', 'yen', 'triangle'
         plot_intermed (True or False): whether to intermediate data product
-                                       image
+                                image
         out_dir (str): Desired directory in which to save intermediate data
-                                  product image (if plot_intermed = True)
+                                product image (if plot_intermed = True);
+                                eventually to be a spatial resolution value
+        res (str): Currently a string indicating DKIST or IBIS resolution;
+                                eventually will be a resolution value
     ----------
     Returns:
         data_map (SunPy map): SunPy map containing segmentated image (with the
@@ -249,7 +252,7 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/',
         fig.suptitle('Intermediate Processesing Steps \n', fontsize=s2)
 
         im0 = ax0.imshow(data / np.max(data), origin='lower')
-        ax0.set_title('scaled Intensity Data', fontsize=s1)
+        ax0.set_title('Scaled Intensity Data', fontsize=s1)
         plt.colorbar(im0, ax=ax0, shrink=0.8)
 
         im1 = ax1.imshow(segmented_image, cmap='gray', origin='lower')
@@ -367,7 +370,9 @@ def mark_faculae(segmented_image, data, res):
     Parameters:
         data (numpy array): the original flux values
         segmented_image (numpy array): the segmented image containing
-                                       incorrect middles
+                                incorrect middles
+        res (str): Currently a string indicating DKIST or IBIS resolution;
+                                eventually will be a resolution value
     ----------
     Returns:
         segmented_image_fixed (numpy array): the segmented image with faculae
@@ -379,7 +384,7 @@ def mark_faculae(segmented_image, data, res):
         fac_brightness_limit = 5000  # flux/pix criterion for faculae
     if res == 'IBIS':
         fac_size_limit = 20  # number of pixels criterion for faculae
-        fac_brightness_limit = 4000  # flux/pix criterion for faculae
+        fac_brightness_limit = 3000  # flux/pix criterion for faculae
 
     if len(np.unique(segmented_image)) > 2:
         raise ValueError('segmented_image must have only values of 1 and 0')
@@ -439,7 +444,6 @@ def overplot_velocities(seg_map, input_file, output_path):
         None; saves outplot plot
     """
 
-    print(input_file)
     if input_file.endswith('.sav'):
         file = sio.readsav(input_file)
         velocities = file['velocity_cln']
