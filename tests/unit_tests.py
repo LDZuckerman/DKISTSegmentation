@@ -211,7 +211,9 @@ class TestUtils(unittest.TestCase):
         # -------- positive tests -------- :
         data_map = funclib.sav_to_map(self.testfile, self.test_band)
         thresholded = np.uint8(data_map.data > np.nanmedian(data_map.data))
-        faculae_marked = funclib.mark_faculae(thresholded, data_map.data)
+        faculae_marked = funclib.mark_faculae(thresholded,
+                                              data_map.data,
+                                              res='IBIS')
         # check that the correct dimensions are returned
         self.assertEqual(thresholded.shape,
                          faculae_marked.shape)
@@ -224,8 +226,11 @@ class TestUtils(unittest.TestCase):
         self.assertNotEqual(len(np.where(faculae_marked == 0.5)[0]), 0)
 
         # ------ error raising tests ------ :
-        self.assertRaises(ValueError, funclib.mark_faculae, data_map.data,
-                          data_map.data)
+        self.assertRaises(ValueError,
+                          funclib.mark_faculae,
+                          data_map.data,
+                          data_map.data,
+                          res='IBIS')
 
     def test_save_to_fits(self):
         """ Unit tests for save_to_fits() function

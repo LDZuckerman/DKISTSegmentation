@@ -190,7 +190,8 @@ def sav_to_numpy(filename, instrument, field):
     return data
 
 
-def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/', res='DKIST'):
+def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/',
+            res='DKIST'):
     """
     Segment optical image of the solar photosphere into tri-value maps
     with 0 = inter-granule, 0.5 = faculae, 1 = granule.
@@ -201,7 +202,7 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/', res
                                  options are 'otsu', 'li', 'isodata',
                                   'mean', 'minimum', 'yen', 'triangle'
         plot_intermed (True or False): whether to intermediate data product
-                                       image (default True)
+                                       image
         out_dir (str): Desired directory in which to save intermediate data
                                   product image (if plot_intermed = True)
     ----------
@@ -310,7 +311,7 @@ def get_threshold(data, method):
     return threshold
 
 
-def  trim_interganules(segmented_image):
+def trim_interganules(segmented_image):
     """
     Remove the erronous idenfication of intergranule material in the
     middle of granules that pure threshold segmentation produces.
@@ -340,7 +341,7 @@ def  trim_interganules(segmented_image):
     for value in values:
         if value != real_IG_value:
             segmented_image_fixed[labeled_seg == value] = 1
-    
+
     return segmented_image_fixed
 
 
@@ -359,16 +360,16 @@ def mark_faculae(segmented_image, data, res):
     """
 
     if res == 'DKIST':
-        fac_size_limit = 250 # number of pixels criterion for faculae
-        fac_brightness_limit = 5000 # flux/pixel criterion for potential faculae
+        fac_size_limit = 250  # number of pixels criterion for faculae
+        fac_brightness_limit = 5000  # flux/pix criterion for faculae
     if res == 'IBIS':
-        fac_size_limit = 20 # number of pixels criterion for faculae
-        fac_brightness_limit = 4000 # flux/pixel criterion for potential faculae
+        fac_size_limit = 20  # number of pixels criterion for faculae
+        fac_brightness_limit = 4000  # flux/pix criterion for faculae
 
     if len(np.unique(segmented_image)) > 2:
         raise ValueError('segmented_image must have only values of 1 and 0')
 
-    segmented_image = segmented_image  
+    segmented_image = segmented_image
     segmented_image_fixed = np.copy(segmented_image.astype(float))
     labeled_seg = skimage.measure.label(segmented_image + 1, connectivity=2)
     values = np.unique(labeled_seg)
@@ -379,7 +380,7 @@ def mark_faculae(segmented_image, data, res):
         if np.sum(np.multiply(mask, segmented_image)) > 0:
             region_size = len(segmented_image_fixed[mask == 1])
             tot_flux = np.sum(data[mask == 1])
-            # check that region is small 
+            # check that region is small
             if region_size < fac_size_limit:
                 # check that avg flux very high
                 if tot_flux / region_size > fac_brightness_limit:
