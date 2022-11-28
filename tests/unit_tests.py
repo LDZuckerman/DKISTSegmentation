@@ -179,8 +179,8 @@ class TestUtils(unittest.TestCase):
                           [],
                           self.test_method)
 
-    def test_remove_middles(self):
-        """ Unit tests for remove_middles() function
+    def test_trim_interganules(self):
+        """ Unit tests for trim_interganules() function
         """
 
         # -------- positive tests -------- :
@@ -190,19 +190,19 @@ class TestUtils(unittest.TestCase):
         self.assertTrue(np.size(thresholded) > 0)
         # check that the correct dimensions are returned
         self.assertEqual(thresholded.shape,
-                         funclib.remove_middles(thresholded).shape)
+                         funclib.trim_interganules(thresholded).shape)
 
         # -------- negative tests -------- :
         # check that the returned array has fewer (or same number)
         # 0-valued pixels as input array (for a data set which we
         # know by eye should have some middle sections removed)
-        middles_removed = funclib.remove_middles(thresholded)
+        middles_removed = funclib.trim_interganules(thresholded)
         self.assertFalse(np.count_nonzero(middles_removed)
                          < np.count_nonzero(thresholded))
 
         # ------ error raising tests ------ :
         # check that raises error if passed array is not binary
-        self.assertRaises(ValueError, funclib.remove_middles, data_map.data)
+        self.assertRaises(ValueError, funclib.trim_interganules, data_map.data)
 
     def test_mark_faculae(self):
         """ Unit tests for mark_faculae() function

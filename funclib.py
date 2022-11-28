@@ -230,7 +230,7 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/', res
     segmented_image = np.uint8(median_filtered > threshold)
 
     # fix the extra IGM bits in the middle of granules
-    segmented_image_fixed = remove_middles(segmented_image)
+    segmented_image_fixed = trim_interganules(segmented_image)
 
     # mark faculae
     segmented_image_markfac = mark_faculae(segmented_image_fixed, data, res)
@@ -310,7 +310,7 @@ def get_threshold(data, method):
     return threshold
 
 
-def remove_middles(segmented_image):
+def  trim_interganules(segmented_image):
     """
     Remove the erronous idenfication of intergranule material in the
     middle of granules that pure threshold segmentation produces.
