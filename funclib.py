@@ -16,6 +16,7 @@ from sunpy.coordinates import frames
 from sunpy.map import make_fitswcs_header
 from matplotlib.lines import Line2D
 import sys
+from sklearn.cluster import KMeans as KMeans
 
 
 def open_file(filename):
@@ -481,12 +482,12 @@ def kmeans_cluster(data, llambda_axis=-1):
         raise Exception('Wrong data shape. \
         (either scalar or (x, y, llambda) )')
     n_clusters = 3
-    n_init = 1000
+    n_init = 20
     x_size = np.shape(data)[0]
     y_size = np.shape(data)[1]
     if llambda_axis == -1:  # a scalar array:
         data_flat = np.reshape(data, (x_size * y_size, 1))
-        labels_flat = Kmeans(n_clusters).fit(data_flat).labels_
+        labels_flat = KMeans(n_clusters).fit(data_flat).labels_
         labels = np.reshape(labels_flat, (x_size, y_size))
     else:
         llambda_size = np.shape(data)[llambda_axis]
@@ -499,21 +500,49 @@ def kmeans_cluster(data, llambda_axis=-1):
     group0_mean = np.mean(data[labels == 0])
     group1_mean = np.mean(data[labels == 1])
     group2_mean = np.mean(data[labels == 2])
-    print([group0_mean, group1_mean, group2_mean])
-
     # granules
     max_index = np.argmax([group0_mean,
                            group1_mean,
                            group2_mean])
     # intergranules
-    min_index = np.argmin({group0_mean,
+    min_index = np.argmin([group0_mean,
                            group1_mean,
-                           group2_mean})
-    print(max_index, min_index)
-
+                           group2_mean])
     return_labels = np.ones(labels.shape)
 
-    return_labels[[labels[:, :] == max_index][0]] -= 1
-    return_labels[[labels[:, :] == min_index][0]] += 1
+    return_labels[[labels[:, :] == min_index][0]] -= 1
 
     return return_labels
+
+
+def cross_correlation(segment1, segment2):
+    # I want to check the percentage
+    # for each method that agrees, for granules / intergranules:
+
+    total_granules = np.count_nonzero(segment1 == 1)
+    total_intergranules = np.count_nonzero(segment1 == 0)
+
+    x_size = np.shape(segment1)[0]
+    y_size = np.shape(segment1)[1]
+
+    granule_agreement_count = 0
+    intergranule_agreement_count = 0
+    for i in range(x_size):
+        for j in range(y_size):
+            if segment1[i, j] == 1 and segment2[i, j] == 1:
+                granule_agreement_count += 1
+            elif segment1[i, j] == 0 and segment2[i, j] == 0:
+                intergranule_agreement_count += 1
+
+    percentage_agreement_granules =\
+        granule_agreement_count / total_granules
+    percentage_agreement_intergranules =\
+        intergranule_agreement_count / total_intergranules
+
+    if percentage_agreement_granules < 0.75 \
+            or percentage_agreement_intergranules < 0.75:
+        raise Exception('Low agreement with K-Means clustering. \
+                         Saved output has low confidence.')
+        return None
+    else:
+        return None
