@@ -260,16 +260,18 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/',
         im3 = ax3.imshow(segmented_image_markfac, cmap='gray', origin='lower')
         ax3.set_title('Faculae Identified', fontsize=s1)
         plt.colorbar(im3, ax=ax3, shrink=0.8)
-        
+
         plt.tight_layout()
 
-        outline=mpe.withStroke(linewidth=5, foreground='black')
-        custom_lines = [lines.Line2D([0], [0], color='white', lw=4, path_effects=[outline]),
-                lines.Line2D([0], [0], color='black', lw=4),
-                lines.Line2D([0], [0], color='grey', lw=4)]
+        outline = mpe.withStroke(linewidth=5, foreground='black')
+        custom_lines = [lines.Line2D([0], [0], color='white', lw=4,
+                        path_effects=[outline]),
+                        lines.Line2D([0], [0], color='black', lw=4),
+                        lines.Line2D([0], [0], color='grey', lw=4)]
         legax = plt.axes([0.1, 0.1, 0.8, 0.85], alpha=0)
         legax.axis('off')
-        legax.legend(custom_lines, ['Granule', 'Intergranule','Faculae'], loc ='upper center', ncol=3, fontsize='x-large')
+        legax.legend(custom_lines, ['Granule', 'Intergranule', 'Faculae'],
+                     loc='upper center', ncol=3, fontsize='x-large')
 
         if not os.path.exists(out_dir):
             try:
