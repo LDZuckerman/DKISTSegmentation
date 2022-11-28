@@ -267,7 +267,7 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/',
 
         outline = mpe.withStroke(linewidth=5, foreground='black')
         custom_lines = [lines.Line2D([0], [0], color='white', lw=4,
-                        path_effects=[outline]),
+                                     path_effects=[outline]),
                         lines.Line2D([0], [0], color='black', lw=4),
                         lines.Line2D([0], [0], color='grey', lw=4)]
         legax = plt.axes([0.1, 0.1, 0.8, 0.85], alpha=0)
@@ -462,3 +462,58 @@ def overplot_velocities(seg_map, input_file, output_path):
                loc=2, borderaxespad=0.)
 
     plt.savefig(output_path)
+
+
+def kmeans_cluster(data, llambda_axis=-1):
+    """kmeans clustering: uses a kmeans algorithm to cluster data,
+       in order to independently cross correlate the skimage clustering method
+        ----------
+       Parameters:
+            data (numpy array): data to be clustered
+            llambda_axis (int): index for wavelength, -1 if scalar array.
+        ----------
+        Returns:
+            labels (numpy array): an array of labels, with 0 = granules,
+                                  2 = intergranules, 1 = in-between.
+            """
+
+    if llambda_axis not in [-1, 2]:
+        raise Exception('Wrong data shape. \
+        (either scalar or (x, y, llambda) )')
+    n_clusters = 3
+    n_init = 1000
+    x_size = np.shape(data)[0]
+    y_size = np.shape(data)[1]
+    if llambda_axis == -1:  # a scalar array:
+        data_flat = np.reshape(data, (x_size * y_size, 1))
+        labels_flat = Kmeans(n_clusters).fit(data_flat).labels_
+        labels = np.reshape(labels_flat, (x_size, y_size))
+    else:
+        llambda_size = np.shape(data)[llambda_axis]
+        data = np.reshape(data, (x_size * y_size, llambda_size))
+        labels = np.reshape(Kmeans(n_clusters, n_init).fit(data),
+                            (x_size, y_size))
+
+    # now, making granules 0, btwn 1, intergranules 2:
+
+    group0_mean = np.mean(data[labels == 0])
+    group1_mean = np.mean(data[labels == 1])
+    group2_mean = np.mean(data[labels == 2])
+    print([group0_mean, group1_mean, group2_mean])
+
+    # granules
+    max_index = np.argmax([group0_mean,
+                           group1_mean,
+                           group2_mean])
+    # intergranules
+    min_index = np.argmin({group0_mean,
+                           group1_mean,
+                           group2_mean})
+    print(max_index, min_index)
+
+    return_labels = np.ones(labels.shape)
+
+    return_labels[[labels[:, :] == max_index][0]] -= 1
+    return_labels[[labels[:, :] == min_index][0]] += 1
+
+    return return_labels
