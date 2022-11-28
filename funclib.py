@@ -543,5 +543,6 @@ def cross_correlation(segment1, segment2):
             or percentage_agreement_intergranules < 0.75:
         raise Exception('Low agreement with K-Means clustering. \
                          Saved output has low confidence.')
+        return None
     else:
         return None
