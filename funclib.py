@@ -258,8 +258,7 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/',
         plt.colorbar(im2, ax=ax2, shrink=0.8)
 
         im3 = ax3.imshow(segmented_image_markfac, cmap='gray', origin='lower')
-        ax3.set_title('Final Segmentation', fontsize=s1)
-        #ax3.set_title('Faculae Identified', fontsize=s1)
+        ax3.set_title('Faculae Identified', fontsize=s1)
         plt.colorbar(im3, ax=ax3, shrink=0.8)
         
         plt.tight_layout()
