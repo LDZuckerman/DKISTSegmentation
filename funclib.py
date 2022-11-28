@@ -1,20 +1,19 @@
+import glob
+import os
+import astropy.io.fits as fits
+import astropy.units as u
+import matplotlib.pyplot as plt
+import numpy as np
 import scipy
 import scipy.io as sio
-import astropy.units as u
-from astropy.coordinates import SkyCoord
-from astropy.io import fits
 import skimage
 import sunpy
 import sunpy.map
+from astropy.coordinates import SkyCoord
 from sunpy.coordinates import frames
 from sunpy.map import make_fitswcs_header
-import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-import numpy as np
 import sys
-import astropy.io.fits as fits
-import os
-import glob
 
 
 def open_file(filename):
@@ -56,8 +55,8 @@ def save_to_fits(segmented_map, data_map, out_file, out_dir):
         out_dir (str): filepath for the fits file
     ----------
     Returns:
-        None: creates fits file with first extension being the segmented map
-              and second extension being the input map
+        None: creates fits file with first extension being the
+              segmented map and second extension being the input map
     """
     if not os.path.exists(out_dir):
         try:
@@ -101,16 +100,19 @@ def sav_to_map(filename, field):
         raise Exception('Field ' + field +
                         ' is not in file keys ', data.keys())
 
-    fake_coord = SkyCoord(0*u.arcsec, 0*u.arcsec,
+    fake_coord = SkyCoord(0 * u.arcsec,
+                          0 * u.arcsec,
                           obstime='2013-10-28 08:24',
-                          observer='earth', frame=frames.Helioprojective)
-    fake_header = make_fitswcs_header(data=np.empty((512, 512)),
+                          observer='earth',
+                          frame=frames.Helioprojective)
+    fake_header = \
+        sunpy.map.make_fitswcs_header(data=np.empty((512, 512)),
                                       coordinate=fake_coord,
-                                      reference_pixel=[0, 0]*u.pixel,
-                                      scale=[2, 2]*u.arcsec / u.pixel,
+                                      reference_pixel=[0, 0] * u.pixel,
+                                      scale=[2, 2] * u.arcsec / u.pixel,
                                       telescope='Fake Telescope',
                                       instrument='Fake Instrument',
-                                      wavelength=1000*u.angstrom)
+                                      wavelength=1000 * u.angstrom)
 
     data_map = sunpy.map.Map(data[field], fake_header)
 
@@ -136,16 +138,19 @@ def fits_to_map(filename):
     except Exception:
         raise Exception('Data does not appear to be in correct .fits format')
 
-    fake_coord = SkyCoord(0 * u.arcsec, 0 * u.arcsec,
+    fake_coord = SkyCoord(0 * u.arcsec,
+                          0 * u.arcsec,
                           obstime='2013-10-28 08:24',
-                          observer='earth', frame=frames.Helioprojective)
-    fake_header = make_fitswcs_header(data=np.empty((512, 512)),
+                          observer='earth',
+                          frame=frames.Helioprojective)
+    fake_header = \
+        sunpy.map.make_fitswcs_header(data=np.empty((512, 512)),
                                       coordinate=fake_coord,
-                                      reference_pixel=[0, 0]*u.pixel,
-                                      scale=[2, 2]*u.arcsec / u.pixel,
+                                      reference_pixel=[0, 0] * u.pixel,
+                                      scale=[2, 2] * u.arcsec / u.pixel,
                                       telescope='Fake Telescope',
                                       instrument='Fake Instrument',
-                                      wavelength=1000*u.angstrom)
+                                      wavelength=1000 * u.angstrom)
 
     data_map = sunpy.map.Map(data, fake_header)
 
@@ -187,18 +192,19 @@ def sav_to_numpy(filename, instrument, field):
     return data
 
 
-def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/'):
+def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/',
+            res='DKIST'):
     """
     Segment optical image of the solar photosphere into tri-value maps
     with 0 = inter-granule, 0.5 = faculae, 1 = granule.
     ----------
     Parameters:
         data_map (SunPy map): SunPy map containing data to segment
-        skimage_method (string): skimage thresholding method - options are
-                                 'otsu', 'li', 'isodata', 'mean', 'minimum',
-                                  'yen', 'triangle'
-        plot_intermed (True or False): whether or not to intermediate data
-                                       product image (default True)
+        skimage_method (string): skimage thresholding method -
+                                 options are 'otsu', 'li', 'isodata',
+                                  'mean', 'minimum', 'yen', 'triangle'
+        plot_intermed (True or False): whether to intermediate data product
+                                       image
         out_dir (str): Desired directory in which to save intermediate data
                                   product image (if plot_intermed = True)
     ----------
@@ -227,10 +233,10 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/'):
     segmented_image = np.uint8(median_filtered > threshold)
 
     # fix the extra IGM bits in the middle of granules
-    segmented_image_fixed = remove_middles(segmented_image)
+    segmented_image_fixed = trim_interganules(segmented_image)
 
     # mark faculae
-    segmented_image_markfac = mark_faculae(segmented_image_fixed, data)
+    segmented_image_markfac = mark_faculae(segmented_image_fixed, data, res)
 
     if plot_intermed:
         # show pipeline process
@@ -307,7 +313,7 @@ def get_threshold(data, method):
     return threshold
 
 
-def remove_middles(segmented_image):
+def trim_interganules(segmented_image):
     """
     Remove the erronous idenfication of intergranule material in the
     middle of granules that pure threshold segmentation produces.
@@ -327,19 +333,21 @@ def remove_middles(segmented_image):
     segmented_image_fixed = np.copy(segmented_image)
     labeled_seg = skimage.measure.label(segmented_image + 1, connectivity=2)
     values = np.unique(labeled_seg)
+    # find value of the 0 region that is big continuous region
+    size = 0
     for value in values:
-        mask = np.zeros_like(segmented_image)
-        mask[labeled_seg == value] = 1
-        # check that is a 0 (black) region
-        if np.sum(np.multiply(mask, segmented_image)) == 0:
-            # check that region is small [bad criteria, change later on]
-            if len(segmented_image_fixed[mask == 1]) < 100:
-                segmented_image_fixed[mask == 1] = 1
+        if len((labeled_seg[labeled_seg == value])) > size:
+            real_IG_value = value
+            size = len(labeled_seg[labeled_seg == value])
+    # set all other 0 regions to 1
+    for value in values:
+        if value != real_IG_value:
+            segmented_image_fixed[labeled_seg == value] = 1
 
     return segmented_image_fixed
 
 
-def mark_faculae(segmented_image, data):
+def mark_faculae(segmented_image, data, res):
     """
     Mark faculae seperatly from granules - give them a value of 0.5 not 1
     ----------
@@ -353,10 +361,17 @@ def mark_faculae(segmented_image, data):
                                              marked as 0.5
     """
 
+    if res == 'DKIST':
+        fac_size_limit = 250  # number of pixels criterion for faculae
+        fac_brightness_limit = 5000  # flux/pix criterion for faculae
+    if res == 'IBIS':
+        fac_size_limit = 20  # number of pixels criterion for faculae
+        fac_brightness_limit = 4000  # flux/pix criterion for faculae
+
     if len(np.unique(segmented_image)) > 2:
         raise ValueError('segmented_image must have only values of 1 and 0')
 
-    segmented_image = segmented_image  # [80:90, 130:140]
+    segmented_image = segmented_image
     segmented_image_fixed = np.copy(segmented_image.astype(float))
     labeled_seg = skimage.measure.label(segmented_image + 1, connectivity=2)
     values = np.unique(labeled_seg)
@@ -367,10 +382,10 @@ def mark_faculae(segmented_image, data):
         if np.sum(np.multiply(mask, segmented_image)) > 0:
             region_size = len(segmented_image_fixed[mask == 1])
             tot_flux = np.sum(data[mask == 1])
-            # check that region is small [bad criteria, change later on]
-            if region_size < 20:
+            # check that region is small
+            if region_size < fac_size_limit:
                 # check that avg flux very high
-                if tot_flux / region_size > 4000:
+                if tot_flux / region_size > fac_brightness_limit:
                     segmented_image_fixed[mask == 1] = 0.5
 
     return segmented_image_fixed
@@ -378,8 +393,9 @@ def mark_faculae(segmented_image, data):
 
 def find_data(filepath):
     """
-    Given a master filepath, traverses through all embeded directories and
-    files, and returns a list of all the files that end in .fits or .sav.
+    Given a master filepath, traverses through all embedded directories
+    and files, and returns a list of all the files that end in
+    .fits or .sav.
 
     Useful for raw data, which is usually in nested directory structures.
     ----------

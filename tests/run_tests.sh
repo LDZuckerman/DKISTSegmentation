@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 # NOTE: directories are referenced here with the expectation that this script
-# will be run from on directory up, using tests/run_tests.sh
+# will be run from one directory up, using tests/run_tests.sh
 
 set -e  # stop on error
 set -u  # raise error if variable is unset

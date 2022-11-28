@@ -5,21 +5,20 @@ import funclib
 import random
 import numpy as np
 import sunpy.map as sm
-import scipy
 import sunpy
 from astropy.io import fits
 import os
 import pathlib as pl
+import scipy
 
 
 class TestUtils(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-
         """ Set up for unit testing by creating toy data
         """
-        cls.ibis_testfile = 'data/IBIS.granulation.aligned.25Apr2019.seq56.sav'
+        cls.ibistestfile = 'data/IBIS.granulation.aligned.25Apr2019.seq56.sav'
         cls.dkist_testfile = 'data/dkist.cont789nm.scaled.fits'
         cls.test_instrument = 'IBIS'
         cls.dkist_instrument = 'DKIST'
@@ -28,7 +27,6 @@ class TestUtils(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-
         """ Tear down unit testing toy data
         """
 
@@ -38,7 +36,6 @@ class TestUtils(unittest.TestCase):
         cls.test_band = None
 
     def test_sav_to_map(self):
-
         """ Unit tests for sav_to_map() function
         """
 
@@ -62,7 +59,6 @@ class TestUtils(unittest.TestCase):
         self.assertRaises(Exception, funclib.sav_to_map, '', self.test_band)
 
     def test_fits_to_map(self):
-
         """ Unit tests for fits_to_map() function
         """
 
@@ -85,7 +81,6 @@ class TestUtils(unittest.TestCase):
         self.assertRaises(Exception, funclib.fits_to_map, '')
 
     def test_sav_to_numpy(self):
-
         """ Unit tests for sav_to_numpy() function
         """
 
@@ -106,12 +101,21 @@ class TestUtils(unittest.TestCase):
 
         # ------ error raising tests ------ :
         # check that errors are raised for incorrect inputs
-        self.assertRaises(Exception, funclib.sav_to_numpy, 'ABC.txt',
-                          self.test_instrument, self.test_band)
-        self.assertRaises(Exception, funclib.sav_to_numpy, self.ibis_testfile,
-                          'telescope', self.test_band)
-        self.assertRaises(Exception, funclib.sav_to_numpy, self.ibis_testfile,
-                          self.test_instrument, 'visible')
+        self.assertRaises(Exception,
+                          funclib.sav_to_numpy,
+                          'ABC.txt',
+                          self.test_instrument,
+                          self.test_band)
+        self.assertRaises(Exception,
+                          funclib.sav_to_numpy,
+                          self.testfile,
+                          'telescope',
+                          self.test_band)
+        self.assertRaises(Exception,
+                          funclib.sav_to_numpy,
+                          self.testfile,
+                          self.test_instrument,
+                          'visible')
 
     def test_segment(self):
         """ Unit tests for segment() function
@@ -166,44 +170,50 @@ class TestUtils(unittest.TestCase):
         self.assertNotEqual(threshold1, threshold2)
 
         # ------ error raising tests ------ :
-        self.assertRaises(ValueError, funclib.get_threshold, test_arr1,
+        self.assertRaises(ValueError,
+                          funclib.get_threshold,
+                          test_arr1,
                           'banana')
-        self.assertRaises(ValueError, funclib.get_threshold, [],
+        self.assertRaises(ValueError,
+                          funclib.get_threshold,
+                          [],
                           self.test_method)
 
-    def test_remove_middles(self):
-        """ Unit tests for remove_middles() function
+    def test_trim_interganules(self):
+        """ Unit tests for trim_interganules() function
         """
 
         # -------- positive tests -------- :
-        data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
+        data_map = funclib.sav_to_map(self.testfile, self.test_band)
         thresholded = np.uint8(data_map.data > np.nanmedian(data_map.data))
         # check that returned array is not empty
         self.assertTrue(np.size(thresholded) > 0)
         # check that the correct dimensions are returned
         self.assertEqual(thresholded.shape,
-                         funclib.remove_middles(thresholded).shape)
+                         funclib.trim_interganules(thresholded).shape)
 
         # -------- negative tests -------- :
         # check that the returned array has fewer (or same number)
         # 0-valued pixels as input array (for a data set which we
         # know by eye should have some middle sections removed)
-        middles_removed = funclib.remove_middles(thresholded)
+        middles_removed = funclib.trim_interganules(thresholded)
         self.assertFalse(np.count_nonzero(middles_removed)
                          < np.count_nonzero(thresholded))
 
         # ------ error raising tests ------ :
         # check that raises error if passed array is not binary
-        self.assertRaises(ValueError, funclib.remove_middles, data_map.data)
+        self.assertRaises(ValueError, funclib.trim_interganules, data_map.data)
 
     def test_mark_faculae(self):
         """ Unit tests for mark_faculae() function
         """
 
         # -------- positive tests -------- :
-        data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
+        data_map = funclib.sav_to_map(self.testfile, self.test_band)
         thresholded = np.uint8(data_map.data > np.nanmedian(data_map.data))
-        faculae_marked = funclib.mark_faculae(thresholded, data_map.data)
+        faculae_marked = funclib.mark_faculae(thresholded,
+                                              data_map.data,
+                                              res='IBIS')
         # check that the correct dimensions are returned
         self.assertEqual(thresholded.shape,
                          faculae_marked.shape)
@@ -216,8 +226,11 @@ class TestUtils(unittest.TestCase):
         self.assertNotEqual(len(np.where(faculae_marked == 0.5)[0]), 0)
 
         # ------ error raising tests ------ :
-        self.assertRaises(ValueError, funclib.mark_faculae, data_map.data,
-                          data_map.data)
+        self.assertRaises(ValueError,
+                          funclib.mark_faculae,
+                          data_map.data,
+                          data_map.data,
+                          res='IBIS')
 
     def test_save_to_fits(self):
         """ Unit tests for save_to_fits() function

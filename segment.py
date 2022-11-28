@@ -25,26 +25,26 @@ def main():
                              + 'input map (extension 1)',
                         default=False,
                         required=False)
-    parser.add_argument('--vel_comparison_file',
-                        type=str,
-                        help='(Optional) Desired name of output image file '
-                             + 'containing segmented contours overplotted '
-                             + 'on velocity data.',
-                        default=None,
-                        required=False)
     parser.add_argument('--out_dir',
                         type=str,
                         help='(Optional) Desired directory in which to save '
                              + 'out_file',
                         default='output/',
                         required=False)
+    parser.add_argument('--vel_comparison_file',
+                    type=str,
+                    help='(Optional) Desired name of output image file '
+                         + 'containing segmented contours overplotted '
+                         + 'on velocity data.',
+                    default=None,
+                    required=False)
 
     args = parser.parse_args()
     skimage_method = args.skimage_method
     input_file = args.input_file
     plot_intermed = args.plot_intermed
-    vel_comparison_file = args.vel_comparison_file
     out_dir = args.out_dir
+    vel_comparison_file = args.vel_comparison_file
 
     # read data into map to mimic use within SunPy
     if input_file.endswith('.sav'):
@@ -56,7 +56,8 @@ def main():
     segmented_map = funclib.segment(data_map,
                                     skimage_method,
                                     plot_intermed,
-                                    args.out_dir)
+                                    out_dir,
+                                    res='DKIST')
 
     # create a visual comparison against velocity data
     if vel_comparison_file is not None:
@@ -74,3 +75,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
