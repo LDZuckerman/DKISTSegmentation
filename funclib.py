@@ -7,6 +7,7 @@ import skimage
 import sunpy
 import sunpy.map
 from sunpy.coordinates import frames
+from sunpy.map import make_fitswcs_header
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
@@ -101,13 +102,13 @@ def sav_to_map(filename, field):
 
     fake_coord = SkyCoord(0 * u.arcsec, 0 * u.arcsec, obstime='2013-10-28 08:24',
                           observer='earth', frame=frames.Helioprojective)
-    fake_header = sunpy.map.make_fitswcs_header(data=np.empty((512, 512)),
-                                                coordinate=fake_coord,
-                                                reference_pixel=[0, 0] * u.pixel,
-                                                scale=[2, 2] * u.arcsec / u.pixel,
-                                                telescope='Fake Telescope',
-                                                instrument='Fake Instrument',
-                                                wavelength=1000 * u.angstrom)
+    fake_header = make_fitswcs_header(data=np.empty((512, 512)),
+                                      coordinate=fake_coord,
+                                      reference_pixel=[0, 0]*u.pixel,
+                                      scale=[2, 2]*u.arcsec / u.pixel,
+                                      telescope='Fake Telescope',
+                                      instrument='Fake Instrument',
+                                      wavelength=1000*u.angstrom)
 
     data_map = sunpy.map.Map(data[field], fake_header)
 
@@ -317,25 +318,39 @@ def remove_middles(segmented_image):
                                              incorrect middles
     """
 
+    print(np.shape(segmented_image))
+
     if len(np.unique(segmented_image)) > 2:
         raise ValueError('segmented_image must have only values of 1 and 0')
 
     segmented_image_fixed = np.copy(segmented_image)
     labeled_seg = skimage.measure.label(segmented_image + 1, connectivity=2)
     values = np.unique(labeled_seg)
+    # find value of the 0 region that is big continuous region
+    size = 0
     for value in values:
-        mask = np.zeros_like(segmented_image)
-        mask[labeled_seg == value] = 1
-        # check that is a 0 (black) region
-        if np.sum(np.multiply(mask, segmented_image)) == 0:
-            # check that region is small [bad criteria, change later on]
-            if len(segmented_image_fixed[mask == 1]) < 100:
-                segmented_image_fixed[mask == 1] = 1
+        if len((labeled_seg[labeled_seg == value])) > size:
+            real_IG_value = value
+            size = len(labeled_seg[labeled_seg == value])
+    print(real_IG_value, size)
+    # set all other 0 regions to 1
+    for value in values:
+        if value != real_IG_value:
+                # mask = np.zeros_like(segmented_image)
+                # mask[labeled_seg == value] = 1
+                segmented_image_fixed[labeled_seg == value] = 1
+
+        #if np.sum(np.multiply(mask, segmented_image)) == 0: # for all 0 (black) regions
+            # # check that region is small [bad criteria, change later on]
+            # if len(segmented_image_fixed[mask == 1]) < 100:
+            #     segmented_image_fixed[mask == 1] = 1
+            # check that region is NOT the big continuous region
+
 
     return segmented_image_fixed
 
 
-def mark_faculae(segmented_image, data):
+def mark_faculae(segmented_image, data, fac_size_limit, fac_brightness_limit):
     """
     Mark faculae seperatly from granules - give them a value of 0.5 not 1
     ----------
@@ -363,10 +378,12 @@ def mark_faculae(segmented_image, data):
         if np.sum(np.multiply(mask, segmented_image)) > 0:
             region_size = len(segmented_image_fixed[mask == 1])
             tot_flux = np.sum(data[mask == 1])
+            print('white region', region_size, tot_flux, tot_flux / region_size)
             # check that region is small [bad criteria, change later on]
-            if region_size < 20:
+            if region_size < fac_size_limit:
                 # check that avg flux very high
-                if tot_flux / region_size > 4000:
+                if tot_flux / region_size > fac_brightness_limit:
+                    print(' here')
                     segmented_image_fixed[mask == 1] = 0.5
 
     return segmented_image_fixed
@@ -392,4 +409,3 @@ def find_data(filepath):
         if file.endswith('.fits') or file.endswith('.sav'):
             files_to_be_segmented.append(file)
     return files_to_be_segmented
-
