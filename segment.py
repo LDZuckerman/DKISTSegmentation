@@ -32,12 +32,12 @@ def main():
                         default='output/',
                         required=False)
     parser.add_argument('--vel_comparison_file',
-                    type=str,
-                    help='(Optional) Desired name of output image file '
-                         + 'containing segmented contours overplotted '
-                         + 'on velocity data.',
-                    default=None,
-                    required=False)
+                        type=str,
+                        help='(Optional) Desired name of output image file '
+                             + 'containing segmented contours overplotted '
+                             + 'on velocity data.',
+                        default=None,
+                        required=False)
 
     args = parser.parse_args()
     skimage_method = args.skimage_method
@@ -75,4 +75,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -18,7 +18,7 @@ class TestUtils(unittest.TestCase):
     def setUpClass(cls):
         """ Set up for unit testing by creating toy data
         """
-        cls.ibistestfile = 'data/IBIS.granulation.aligned.25Apr2019.seq56.sav'
+        cls.ibis_testfile = 'data/IBIS.granulation.aligned.25Apr2019.seq56.sav'
         cls.dkist_testfile = 'data/dkist.cont789nm.scaled.fits'
         cls.test_instrument = 'IBIS'
         cls.dkist_instrument = 'DKIST'
@@ -108,12 +108,12 @@ class TestUtils(unittest.TestCase):
                           self.test_band)
         self.assertRaises(Exception,
                           funclib.sav_to_numpy,
-                          self.testfile,
+                          self.ibis_testfile,
                           'telescope',
                           self.test_band)
         self.assertRaises(Exception,
                           funclib.sav_to_numpy,
-                          self.testfile,
+                          self.ibis_testfile,
                           self.test_instrument,
                           'visible')
 
@@ -184,7 +184,7 @@ class TestUtils(unittest.TestCase):
         """
 
         # -------- positive tests -------- :
-        data_map = funclib.sav_to_map(self.testfile, self.test_band)
+        data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
         thresholded = np.uint8(data_map.data > np.nanmedian(data_map.data))
         # check that returned array is not empty
         self.assertTrue(np.size(thresholded) > 0)
@@ -209,7 +209,7 @@ class TestUtils(unittest.TestCase):
         """
 
         # -------- positive tests -------- :
-        data_map = funclib.sav_to_map(self.testfile, self.test_band)
+        data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
         thresholded = np.uint8(data_map.data > np.nanmedian(data_map.data))
         faculae_marked = funclib.mark_faculae(thresholded,
                                               data_map.data,
