@@ -534,11 +534,14 @@ def cross_correlation(segment1, segment2):
             elif segment1[i, j] == 0 and segment2[i, j] == 0:
                 intergranule_agreement_count += 1
 
-    percentage_agreement_granules = granule_agreement_count / total_granules
-    percentage_agreement_intergranules = intergranule_agreement_count / total_intergranules
+    percentage_agreement_granules =\
+        granule_agreement_count / total_granules
+    percentage_agreement_intergranules =\
+        intergranule_agreement_count / total_intergranules
 
     if percentage_agreement_granules < 0.75 \
             or percentage_agreement_intergranules < 0.75:
-        raise Exception ('Low agreement with K-Means clustering. Saved output has low confidence.')
+        raise Exception('Low agreement with K-Means clustering. \
+                         Saved output has low confidence.')
     else:
         return None
