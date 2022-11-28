@@ -44,12 +44,23 @@ def main():
     if input_file.endswith('.fits'):
         data_map = funclib.fits_to_map(input_file)
 
+    # check for res flags
+    if "dkist" in input_file.lower():
+        res = "DKIST"
+    elif "ibis" in input_file.lower():
+        res = "IBIS"
+    else:
+        print('Currently file name must contain "dkist" or "ibis", for ' +
+              'proper faculae detection. This will be updated in a later ' +
+              'verions. Defaulting to DKIST.')
+        res = "DKIST"
+
     # apply segmentation pipeline
     segmented_map = funclib.segment(data_map,
                                     skimage_method,
                                     plot_intermed,
                                     out_dir,
-                                    res='DKIST')
+                                    res)
 
     # save map as fits file
     if args.out_file is not None:
