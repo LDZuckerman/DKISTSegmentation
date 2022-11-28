@@ -31,12 +31,19 @@ def main():
                              + 'out_file',
                         default='output/',
                         required=False)
+    parser.add_argument('--vel_comparison_file',
+                        type=str,
+                        help='(Optional) Desired name of output image file '
+                             + 'containing segmented contours overplotted '
+                             + 'on velocity data.',
+                        default=None,
+                        required=False)
 
     args = parser.parse_args()
     skimage_method = args.skimage_method
     input_file = args.input_file
-    plot_intermed = args.plot_intermed
     out_dir = args.out_dir
+    plot_intermed = args.plot_intermed
 
     # read data into map to mimic use within SunPy
     if input_file.endswith('.sav'):
@@ -62,12 +69,18 @@ def main():
                                     out_dir,
                                     res)
 
+    # create a visual comparison against velocity data
+    if args.vel_comparison_file is not None:
+        funclib.overplot_velocities(segmented_map,
+                                    input_file,
+                                    out_dir + '/' + args.vel_comparison_file)
+
     # save map as fits file
     if args.out_file is not None:
         funclib.save_to_fits(segmented_map,
                              data_map,
                              args.out_file,
-                             args.out_dir)
+                             out_dir)
 
 
 if __name__ == "__main__":
