@@ -37,11 +37,8 @@ def main():
     input_file = args.input_file
     plot_intermed = args.plot_intermed
 
-     # read data into map to mimic use within SunPy
-    if input_file.endswith('.sav'):
-        data_map = funclib.sav_to_map(input_file, 'rosa_gband')
-    if input_file.endswith('.fits'):
-        data_map = funclib.fits_to_map(input_file) 
+    # read data into map to mimic use within SunPy
+    data_map = funclib.sav_to_map(input_file, 'rosa_gband')
 
     # apply segmentation pipeline
     segmented_map = funclib.segment(data_map,

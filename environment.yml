@@ -10,4 +10,3 @@ dependencies:
   - sunpy
   - scikit-image
   - astropy
-  - glob
