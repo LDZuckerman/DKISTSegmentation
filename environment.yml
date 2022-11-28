@@ -1,4 +1,4 @@
-name: dkist
+name: swe4s
 channels:
   - conda-forge
   - anaconda
