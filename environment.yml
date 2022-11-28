@@ -1,4 +1,4 @@
-name: dkist
+name: swe4s
 channels:
   - conda-forge
   - anaconda
@@ -10,3 +10,4 @@ dependencies:
   - sunpy
   - scikit-image
   - astropy
+  - scikit-learn

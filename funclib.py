@@ -269,10 +269,10 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/',
         plt.tight_layout()
 
         outline = mpe.withStroke(linewidth=5, foreground='black')
-        custom_lines = [Line2D([0], [0], color='white', lw=4,
-                        path_effects=[outline]),
-                        Line2D([0], [0], color='black', lw=4),
-                        Line2D([0], [0], color='grey', lw=4)]
+        custom_lines = [lines.Line2D([0], [0], color='white', lw=4,
+                                     path_effects=[outline]),
+                        lines.Line2D([0], [0], color='black', lw=4),
+                        lines.Line2D([0], [0], color='grey', lw=4)]
         legax = plt.axes([0.1, 0.1, 0.8, 0.85], alpha=0)
         legax.axis('off')
         legax.legend(custom_lines, ['Granule', 'Intergranule', 'Faculae'],
@@ -286,7 +286,7 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/',
         plt.savefig(out_dir + 'intermediate_outputs.png')
 
     # convert segmentated image back into SunPy map with original header
-    segmented_map = sunpy.map.Map(segmented_image, header)
+    segmented_map = sunpy.map.Map(segmented_image_markfac, header)
 
     return segmented_map
 
