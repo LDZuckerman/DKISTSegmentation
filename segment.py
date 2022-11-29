@@ -82,6 +82,12 @@ def main():
                              args.out_file,
                              out_dir)
 
+        # check out put via kmeans:
+        # still working on IBIS data:
+        if input_file.endswith('.fits'):
+            kmeans_labels = funclib.kmeans_cluster(data_map, llambda_axis=-1)
+            funclib.cross_correlation(segmented_map, kmeans_labels)
+
 
 if __name__ == "__main__":
     main()
