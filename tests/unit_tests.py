@@ -277,6 +277,7 @@ class TestUtils(unittest.TestCase):
 
     def test_cross_correlation(self):
         # -------- positive tests -------- :
+        # positive test 1: if arrays agree, return 0:
         test_size = 10
         test_array_1 = np.ones((test_size, test_size))
         test_array_2 = np.ones((test_size, test_size))
@@ -286,19 +287,19 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(0, funclib.cross_correlation(test_array_1,
                                                       test_array_2))
 
-        # ------ error raising tests ------ :
-        # error test 1: if no granules or intergranules in skimage cluster:
-        test_array_1 = np.ones((test_size, test_size))
-        test_array_2 = np.ones((test_size, test_size))
-        self.assertRaises(Exception, funclib.cross_correlation,
-                          test_array_1, test_array_2)
-
-        # error test 2: if cross correlation too low:
+        # positive test 2: if cross correlation too low, return -1:
         test_array_1 = np.ones((test_size, test_size))
         test_array_1[0, 0] = 0
         test_array_2 = np.zeros((test_size, test_size))
         test_array_2[0, 0] = 1
 
+        self.assertEqual(-1, funclib.cross_correlation(test_array_1,
+                                                       test_array_2))
+
+        # ------ error raising tests ------ :
+        # error test 1: if no granules or intergranules in skimage cluster:
+        test_array_1 = np.ones((test_size, test_size))
+        test_array_2 = np.ones((test_size, test_size))
         self.assertRaises(Exception, funclib.cross_correlation,
                           test_array_1, test_array_2)
 
