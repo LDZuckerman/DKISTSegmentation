@@ -7,8 +7,8 @@ This repository contains a pipeline for segmenting optical images of the solar
 photosphere to identify granules. We segment into tri-valued images with 0 = 
 inter-granule, 0.5 = faculae, and 1 = granule. 
 
-Ideally, this technique will be accurate enough to apply to high-resolution 
-DKIST data. Currently, we only have access to test data from IBIS.
+These segmentation pipelines were designed using IBIS data, and are currently being 
+extended to higher-resolution DKIST data.
 
 For possible future integration with the SunPy package, we first convert test 
 data to SunPy maps, and outputs are converted to SunPy maps as well. 
@@ -49,16 +49,17 @@ file IBIS.granulation.aligned.25Apr2019.seq56.sav test can be downloaded from
 
 To perform the segmentation on this data, creating the optional output plots 
 and fits file:
-
-python segment.py\ 
-        --input_file IBIS.granulation.aligned.25Apr2019.seq56.sav 
-        --skimage_method li 
-        --plot_intermed True
+```
+python segment.py\
+        --input_file IBIS.granulation.aligned.25Apr2019.seq56.sav\ 
+        --skimage_method li\
+        --plot_intermed True\
         --save_fits True
+```
 
 ## Thresholding methods
 
 The pipeline is built on existing sci-kit image (skimage) packages to determine
 thresholding values. These are passed to the segment function as 'skimage-
 method'. We recomend use of the 'Li' or 'mean' methods, although all should be
-tested on a given dataset.  
+tested on a given dataset.
