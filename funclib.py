@@ -526,6 +526,12 @@ def cross_correlation(segment1, segment2):
     total_granules = np.count_nonzero(segment1 == 1)
     total_intergranules = np.count_nonzero(segment1 == 0)
 
+    if total_granules == 0:
+        raise Exception('clustering problematic (no granules found)')
+
+    if total_intergranules == 0:
+        raise Exception('clustering problematic (no intergranules found)')
+
     x_size = np.shape(segment1)[0]
     y_size = np.shape(segment1)[1]
 
@@ -545,8 +551,8 @@ def cross_correlation(segment1, segment2):
 
     if percentage_agreement_granules < 0.75 \
             or percentage_agreement_intergranules < 0.75:
-        raise Exception('Low agreement with K-Means clustering. \
+        print('Low agreement with K-Means clustering. \
                          Saved output has low confidence.')
-        return None
+        return -1
     else:
-        return None
+        return 0
