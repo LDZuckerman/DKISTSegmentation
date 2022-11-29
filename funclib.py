@@ -438,6 +438,7 @@ def overplot_velocities(seg_map, input_file, output_path):
     ----------
     Parameters:
         seg_map (sunpy map): Sunpy map containing segmented data
+        input_file (sav data file): IBIS map to be segmented and overplotted
         output_path (string): path to save output plot
     ----------
     Returns:
@@ -520,9 +521,22 @@ def kmeans_cluster(data, llambda_axis=-1):
 
 
 def cross_correlation(segment1, segment2):
-    # I want to check the percentage
-    # for each method that agrees, for granules / intergranules:
-
+    """
+    Cross Correlation:
+    returns -1 and prints a message if the agreement between two
+    arrays is low, 0 otherwise. Designed to be used with segment.py
+    and funclib.kmeans function.
+    ----------
+    Parameters:
+        segment1 (numpy array): 'main' array the other one
+                                 is being compared to.
+        segment2 (numpy array): 'other' array (i.e. one
+                                 segmented using kmeans).
+    ----------
+    Returns:
+        -1: if agreement is low (below 75%)
+        0: otherwise
+    """
     total_granules = np.count_nonzero(segment1 == 1)
     total_intergranules = np.count_nonzero(segment1 == 0)
 
