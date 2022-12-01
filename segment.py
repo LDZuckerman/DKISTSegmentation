@@ -50,21 +50,26 @@ def main():
     skimage_method = args.skimage_method
    # input_file = args.input_file
     out_dir = args.out_dir
+    out_file = args.out_file
     plot_intermed = args.plot_intermed
     vel_comp_file = args.vel_comparison_file
     
     # define wavelength band of interest for dkist
     dkist_band = 'rosa_gband'
-    
+       
     # get the list of data:
     data_to_be_segmented = funclib.find_data(data_path)
+       
     for input_file in data_to_be_segmented:
-
+        
+        # get the name of the input file (minus extenstion) for bookkeeping
+        file_id = input_file.rsplit('.', 1)[0]
+        
         # read data into map to mimic use within SunPy
         if input_file.endswith('.sav'):
-            data_map = funclib.sav_to_map(input_file, dkist_band)
+            data_map = funclib.sav_to_map(data_path + '/' + input_file, dkist_band)
         if input_file.endswith('.fits'):
-            data_map = funclib.fits_to_map(input_file)
+            data_map = funclib.fits_to_map(data_path + '/' + input_file)
 
         # check for res flags
         if "dkist" in input_file.lower():
@@ -78,7 +83,7 @@ def main():
             res = "DKIST"
 
         # apply segmentation pipeline
-        segmented_map = funclib.segment(input_file,
+        segmented_map = funclib.segment(file_id,
                                         data_map,
                                         skimage_method,
                                         plot_intermed,
@@ -88,15 +93,15 @@ def main():
         # create a visual comparison against velocity data
         if args.vel_comparison_file is not None:
             funclib.overplot_velocities(segmented_map,
-                                        input_file,
+                                        data_path + '/' + input_file,
                                         out_dir + '/' + vel_comp_file + '_' +
-                                        input_file)
+                                        file_id + '.png')
 
         # save map as fits file
         if args.out_file is not None:
             funclib.save_to_fits(segmented_map,
                                  data_map,
-                                 args.out_file + '_' + input_file,
+                                 out_file + '_' + file_id + '.fits',
                                  out_dir)
 
             # check out put via kmeans:
