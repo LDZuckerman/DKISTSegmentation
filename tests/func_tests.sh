@@ -54,36 +54,36 @@ rm -r $curr_dir$test_dir
 
 # --------------- Checks for running on DKIST data ------------------ #
 # check run on IBIS data, with velocity comparison 
-#test_dir='/output_DKIST_test'
-#run test_segment_ibis python segment.py \
-#    --data_path 'data/DKIST' \
-#    --skimage_method 'li' \
-#    --plot_intermed True \
-#    --out_file 'output' \
-#    --out_dir $test_dir
+test_dir='/output_DKIST_test'
+run test_segment_ibis python segment.py \
+    --data_path 'data/DKIST' \
+    --skimage_method 'li' \
+    --plot_intermed True \
+    --out_file 'output' \
+    --out_dir 'output_DKIST_test/'
 
-#curr_dir=$(pwd)
-#file_id='DKIST_example'
-#file='/intermediate_outputs_'$file_id'.png'
-#path=$curr_dir$test_dir$file
-## check that the output file actually exists
-#if [ -f "$path" ]; then
-#   echo ' TEST SUCCEEDED: intermediate output plot found in '$path 
-#else
-#   echo ' TEST FAILED: intermediate output plot not found in '$path 
-#fi
-#rm $path
-#assert_exit_code 0
+curr_dir=$(pwd)
+file_id='DKIST_example'
+file='/intermediate_outputs_'$file_id'.png'
+path=$curr_dir$test_dir$file
+# check that the output file actually exists
+if [ -f "$path" ]; then
+   echo ' TEST SUCCEEDED: intermediate output plot found in '$path 
+else
+   echo ' TEST FAILED: intermediate output plot not found in '$path 
+fi
+rm $path
+assert_exit_code 0
 
-#file='/output_'$file_id'.fits'
-#path=$curr_dir$test_dir$file
-## check that the output file actually exists
-#if [ -f "$path" ]; then
-#   echo ' TEST SUCCEEDED: output datafile found in '$path 
-#else
-#   echo ' TEST FAILED: output datafile not found in '$path 
-#fi
-#rm $path
-#assert_exit_code 0
+file='/output_'$file_id'.fits'
+path=$curr_dir$test_dir$file
+# check that the output file actually exists
+if [ -f "$path" ]; then
+   echo ' TEST SUCCEEDED: output datafile found in '$path 
+else
+   echo ' TEST FAILED: output datafile not found in '$path 
+fi
+rm $path
+assert_exit_code 0
 
-#rm -r $curr_dir$test_dir
+rm -r $curr_dir$test_dir
