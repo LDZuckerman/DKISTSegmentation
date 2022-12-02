@@ -50,10 +50,10 @@ and fits file:
 
 ```
 python segment.py\
-    --input_file 'data/IBIS.granulation.aligned.25Apr2019.seq56.sav'\
+    --input_file 'data/IBIS/IBIS_example.sav'\
     --skimage_method 'li'\
     --plot_intermed True\
-    --out_file 'output.fits\
+    --out_file 'segmented_data.fits\
     --vel_comparison_file 'velocity_comparison'\
     --out_dir 'output_IBIS/'
 ```
@@ -63,12 +63,13 @@ and fits file:
 
 ```
 python segment.py\
-    --input_file 'data/dkist.cont789nm.scaled.fits' \
+    --input_file 'data/DKIST/DKIST_example.fits' \
     --skimage_method 'li' \
     --plot_intermed True \
-    --out_file 'output.fits' \
+    --out_file 'segmented_data.fits' \
     --out_dir 'output_DKIST/'
 ```
+The outputs of this example call are located in the `example_outputs\IBIS` directory.
 
 where the arugments are \
 `input_file`: Input datafile path.\
@@ -77,6 +78,8 @@ where the arugments are \
 `out_file`: (Optional) Desired name of output fits file containing segmented map (extension 0) and input map (extension 1)\
 `vel_comparison_file`: (Optional) Desired name of output image file containing segmented contours overplotted on velocity data.\
 `out_dir`: (Optional) Desired directory in which to save out_file.
+
+The outputs of this example call are located in the `example_outputs\DKIST` directory.
 
 ## Thresholding methods
 
