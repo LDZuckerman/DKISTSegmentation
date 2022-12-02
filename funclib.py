@@ -426,7 +426,7 @@ def find_data(filepath):
                                                  to be segmented.
     """
     files_to_be_segmented = []
-    files = os.listdir(filepath) #glob.glob(filepath + '**', recursive=True)
+    files = os.listdir(filepath)  # glob.glob(filepath + '**', recursive=True)
     for file in files:
         if file.endswith('.fits') or file.endswith('.sav'):
             files_to_be_segmented.append(file)
@@ -535,9 +535,10 @@ def cross_correlation(segment1, segment2):
                                  segmented using kmeans).
     ----------
     Returns:
-        -1: if agreement is low (below 75%)
+       -1: if agreement is low (below 75%)
         0: otherwise
     """
+
     total_granules = np.count_nonzero(segment1 == 1)
     total_intergranules = np.count_nonzero(segment1 == 0)
 

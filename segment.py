@@ -11,10 +11,10 @@ def main():
                         help='filepath to directory containing data to ' +
                         'be segmented.',
                         required=True)
-    #parser.add_argument('--input_file', dest='input_file',
-    #                    type=str,
-    #                    help='Input datafile path.',
-    #                    required=True)
+    # parser.add_argument('--input_file', dest='input_file',
+    #                     type=str,
+    #                     help='Input datafile path.',
+    #                     required=True)
     parser.add_argument('--skimage_method', dest='skimage_method',
                         type=str,
                         help='Skimage method to use for initial thresholding',
@@ -48,26 +48,27 @@ def main():
     args = parser.parse_args()
     data_path = args.data_path
     skimage_method = args.skimage_method
-   # input_file = args.input_file
+    # input_file = args.input_file
     out_dir = args.out_dir
     out_file = args.out_file
     plot_intermed = args.plot_intermed
     vel_comp_file = args.vel_comparison_file
-    
+
     # define wavelength band of interest for dkist
     dkist_band = 'rosa_gband'
-       
+
     # get the list of data:
     data_to_be_segmented = funclib.find_data(data_path)
-       
+
     for input_file in data_to_be_segmented:
-        
+
         # get the name of the input file (minus extenstion) for bookkeeping
         file_id = input_file.rsplit('.', 1)[0]
-        
+
         # read data into map to mimic use within SunPy
         if input_file.endswith('.sav'):
-            data_map = funclib.sav_to_map(data_path + '/' + input_file, dkist_band)
+            data_map = funclib.sav_to_map(data_path + '/' + input_file,
+                                          dkist_band)
         if input_file.endswith('.fits'):
             data_map = funclib.fits_to_map(data_path + '/' + input_file)
 
@@ -78,8 +79,8 @@ def main():
             res = "IBIS"
         else:
             print('Currently file name must contain "dkist" or "ibis", for ' +
-                  'proper faculae detection. This will be updated in a later ' +
-                  'verions. Defaulting to DKIST.')
+                  'proper faculae detection. This will be updated in a ' +
+                  'later version. Defaulting to DKIST.')
             res = "DKIST"
 
         # apply segmentation pipeline
@@ -107,8 +108,9 @@ def main():
             # check out put via kmeans:
             # still working on IBIS data:
             if input_file.endswith('.fits'):
-                kmeans_labels = funclib.kmeans_cluster(data_map, llambda_axis=-1)
-                funclib.cross_correlation(segmented_map, kmeans_labels)
+                kmeans_labels = funclib.kmeans_cluster(data_map.data,
+                                                       llambda_axis=-1)
+                funclib.cross_correlation(segmented_map.data, kmeans_labels)
 
 
 if __name__ == "__main__":
