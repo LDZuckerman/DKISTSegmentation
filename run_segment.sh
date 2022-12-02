@@ -13,5 +13,5 @@ set -o pipefail  # fail if any prior step failed
 python segment.py --data_path 'data/IBIS' --skimage_method 'li' --plot_intermed True --out_file 'output' --vel_comparison_file 'velocity_comparison' --out_dir 'output_IBIS/'
 
 # to run on DKIST data
-#python segment.py --data_path 'data/DKIST' --skimage_method 'li' --plot_intermed True --out_file 'output.fits' --out_dir 'output_DKIST/'
+python segment.py --data_path 'data/DKIST' --skimage_method 'li' --plot_intermed True --out_file 'output.fits' --out_dir 'output_DKIST/'
 
