@@ -10,7 +10,6 @@ set -o pipefail  # fail if any prior step failed
 # run pycodestyle on new python scripts used in unit and functional testing
 pycodestyle funclib.py
 pycodestyle segment.py
-pycodestyle segment_multiple.py
 pycodestyle tests/unit_tests.py
 
 # run unit testing

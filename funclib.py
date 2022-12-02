@@ -285,7 +285,7 @@ def segment(file_id, data_map, skimage_method, plot_intermed=True,
                 os.mkdir(out_dir)
             except Exception:
                 raise OSError('Could not make directory ' + out_dir)
-        plt.savefig(out_dir + 'intermediate_outputs_' + file_id + '.png')
+        plt.savefig(out_dir + 'segmentation_plots_' + file_id + '.png')
 
     # convert segmentated image back into SunPy map with original header
     segmented_map = sunpy.map.Map(segmented_image_markfac, header)

@@ -15,7 +15,7 @@ run test_segment_ibis python segment.py \
 
 curr_dir=$(pwd)
 file_id='IBIS_example'
-file='/intermediate_outputs_'$file_id'.png'
+file='/segmentation_plots_'$file_id'.png'
 path=$curr_dir$test_dir$file
 
 # check that the output file actually exists
@@ -64,7 +64,7 @@ run test_segment_ibis python segment.py \
 
 curr_dir=$(pwd)
 file_id='DKIST_example'
-file='/intermediate_outputs_'$file_id'.png'
+file='/segmentation_plots_'$file_id'.png'
 path=$curr_dir$test_dir$file
 # check that the output file actually exists
 if [ -f "$path" ]; then
