@@ -10,6 +10,7 @@ from astropy.io import fits
 import os
 import pathlib as pl
 import scipy
+import shutil
 
 
 class TestUtils(unittest.TestCase):
@@ -18,8 +19,10 @@ class TestUtils(unittest.TestCase):
     def setUpClass(cls):
         """ Set up for unit testing by creating toy data
         """
-        cls.ibis_testfile = 'data/IBIS.granulation.aligned.25Apr2019.seq56.sav'
-        cls.dkist_testfile = 'data/dkist.cont789nm.scaled.fits'
+        cls.ibis_testfile = 'data/IBIS/IBIS_example.sav'
+        cls.dkist_testfile = 'data/DKIST/DKIST_example.fits'
+        cls.dkist_fileid = 'DKIST_example'
+        cls.ibis_fileid = 'IBIS_example'
         cls.test_instrument = 'IBIS'
         cls.dkist_instrument = 'DKIST'
         cls.test_method = 'li'
@@ -31,9 +34,14 @@ class TestUtils(unittest.TestCase):
         """
 
         cls.ibis_testfile = None
+        cls.dkist_testfile = None
+        cls.ibis_fileid = None
+        cls.dkist_fileid = None
         cls.test_instrument = None
+        cls.dkist_instrument = None
         cls.test_method = None
         cls.test_band = None
+        shutil.rmtree('test_output')
 
     def test_sav_to_map(self):
         """ Unit tests for sav_to_map() function
@@ -124,7 +132,8 @@ class TestUtils(unittest.TestCase):
         # -------- positive tests -------- :
         # check that the returned type is correct
         data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
-        segmented = funclib.segment(data_map, self.test_method)
+        segmented = funclib.segment(self.ibis_fileid, data_map,
+                                    self.test_method, out_dir='test_output/')
         test_type = type(segmented)
         self.assertEqual(test_type, sunpy.map.mapbase.GenericMap)
         # get an array of pixel values and check it is not empty
@@ -145,7 +154,8 @@ class TestUtils(unittest.TestCase):
                                 segmented.data[x[i], y[i]])
 
         # ------ error raising tests ------ :
-        self.assertRaises(TypeError, funclib.segment, data_map, 'skimage')
+        self.assertRaises(TypeError, funclib.segment, self.ibis_testfile,
+                          data_map, 'skimage')
         self.assertRaises(TypeError, funclib.segment,
                           funclib.sav_to_numpy(self.ibis_testfile,
                                                self.test_instrument,
@@ -237,7 +247,10 @@ class TestUtils(unittest.TestCase):
         """
 
         data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
-        segmented_map = funclib.segment(data_map, self.test_method)
+        segmented_map = funclib.segment(self.ibis_fileid,
+                                        data_map,
+                                        self.test_method,
+                                        out_dir='test_output/')
         funclib.save_to_fits(segmented_map, data_map,
                              'test_output.fits',
                              'output/')
@@ -308,7 +321,10 @@ class TestUtils(unittest.TestCase):
         """
 
         data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
-        segmented_map = funclib.segment(data_map, self.test_method)
+        segmented_map = funclib.segment(self.ibis_fileid,
+                                        data_map,
+                                        self.test_method,
+                                        out_dir='test_output/')
         out_file_path = 'test_outputs/velocity_comparison.png'
         funclib.overplot_velocities(segmented_map,
                                     self.ibis_testsfile,

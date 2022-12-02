@@ -195,13 +195,14 @@ def sav_to_numpy(filename, instrument, field):
     return data
 
 
-def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/',
-            res='DKIST'):
+def segment(file_id, data_map, skimage_method, plot_intermed=True,
+            out_dir='output/', res='DKIST'):
     """
     Segment optical image of the solar photosphere into tri-value maps
     with 0 = inter-granule, 0.5 = faculae, 1 = granule.
     ----------
     Parameters:
+        file_id (string): id name of file to be segmented
         data_map (SunPy map): SunPy map containing data to segment
         skimage_method (string): skimage thresholding method -
                                 options are 'otsu', 'li', 'isodata',
@@ -284,7 +285,7 @@ def segment(data_map, skimage_method, plot_intermed=True, out_dir='output/',
                 os.mkdir(out_dir)
             except Exception:
                 raise OSError('Could not make directory ' + out_dir)
-        plt.savefig(out_dir + 'intermediate_outputs.png')
+        plt.savefig(out_dir + 'intermediate_outputs_' + file_id + '.png')
 
     # convert segmentated image back into SunPy map with original header
     segmented_map = sunpy.map.Map(segmented_image_markfac, header)
@@ -425,7 +426,7 @@ def find_data(filepath):
                                                  to be segmented.
     """
     files_to_be_segmented = []
-    files = glob.glob(filepath + '**', recursive=True)
+    files = os.listdir(filepath)  # glob.glob(filepath + '**', recursive=True)
     for file in files:
         if file.endswith('.fits') or file.endswith('.sav'):
             files_to_be_segmented.append(file)
@@ -534,9 +535,10 @@ def cross_correlation(segment1, segment2):
                                  segmented using kmeans).
     ----------
     Returns:
-        -1: if agreement is low (below 75%)
+       -1: if agreement is low (below 75%)
         0: otherwise
     """
+
     total_granules = np.count_nonzero(segment1 == 1)
     total_intergranules = np.count_nonzero(segment1 == 0)
 
