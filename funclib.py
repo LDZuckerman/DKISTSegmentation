@@ -330,7 +330,7 @@ def get_threshold(data, method):
     return threshold
 
 
-def trim_interganules(segmented_image):
+def trim_interganules(segmented_image, mark = False):
     """
     Remove the erronous idenfication of intergranule material in the
     middle of granules that pure threshold segmentation produces.
@@ -338,6 +338,8 @@ def trim_interganules(segmented_image):
     Parameters:
         segmented_image (numpy array): the segmented image containing
                                        incorrect middles
+        mark (bool): if false, remove erronous intergranules. If true,
+                     mark them as 2 instead.
     ----------
     Returns:
         segmented_image_fixed (numpy array): the segmented image without
@@ -359,7 +361,10 @@ def trim_interganules(segmented_image):
     # set all other 0 regions to 1
     for value in values:
         if value != real_IG_value:
-            segmented_image_fixed[labeled_seg == value] = 1
+            if not mark:
+                segmented_image_fixed[labeled_seg == value] = 1
+            elif mark:
+                segmented_image_fixed[labeled_seg == value] = 2
 
     return segmented_image_fixed
 

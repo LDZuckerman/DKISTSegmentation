@@ -202,6 +202,13 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(thresholded.shape,
                          funclib.trim_interganules(thresholded).shape)
 
+        # new positive test: mark erronous material, not remove.
+        granules_before = np.count_nonzero(thresholded[thresholded == 1])
+        trimmed_data = funclib.trim_interganules(thresholded, mark=True)
+        granules_after = np.count_nonzero(trimmed_data[trimmed_data == 1])
+
+        self.assertEqual(granules_before, granules_after)
+
         # -------- negative tests -------- :
         # check that the returned array has fewer (or same number)
         # 0-valued pixels as input array (for a data set which we
