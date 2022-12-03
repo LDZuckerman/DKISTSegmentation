@@ -203,11 +203,10 @@ class TestUtils(unittest.TestCase):
                          funclib.trim_interganules(thresholded).shape)
 
         # new positive test: mark erronous material, not remove.
-        granules_before = np.count_nonzero(thresholded[thresholded == 1])
         middles_marked = funclib.trim_interganules(thresholded, mark=True)
-        granules_after = np.count_nonzero(middles_marked[middles_marked == 1])
+        marked_erroneous = np.count_nonzero(middles_marked[middles_marked == 2])
 
-        self.assertEqual(granules_before, granules_after)
+        self.assertNotEqual(marked_erroneous, 0)
 
         # -------- negative tests -------- :
         # check that the returned array has fewer (or same number)
