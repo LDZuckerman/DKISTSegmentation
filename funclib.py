@@ -363,7 +363,7 @@ def trim_interganules(segmented_image, mark=False):
         if value != real_IG_value:
             if not mark:
                 segmented_image_fixed[labeled_seg == value] = 1
-            elif mark:
+            else:
                 segmented_image_fixed[labeled_seg == value] = 2
 
     return segmented_image_fixed
