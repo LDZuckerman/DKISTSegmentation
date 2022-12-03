@@ -203,7 +203,8 @@ class TestUtils(unittest.TestCase):
                          funclib.trim_interganules(thresholded).shape)
 
         # new positive test: mark erronous material, not remove.
-        middles_marked = funclib.trim_interganules(thresholded, mark=True)
+        middles_marked =\
+            funclib.trim_interganules(thresholded, mark=True)
         marked_erroneous =\
             np.count_nonzero(middles_marked[middles_marked == 2])
 
