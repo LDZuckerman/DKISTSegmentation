@@ -190,7 +190,7 @@ class TestUtils(unittest.TestCase):
                           self.test_method)
 
     def test_trim_interganules(self):
-        """ Unit tests for trim_interganules() function
+        """ Unit tests for trim_intergranules() function
         """
 
         # -------- positive tests -------- :
@@ -204,8 +204,8 @@ class TestUtils(unittest.TestCase):
 
         # new positive test: mark erronous material, not remove.
         granules_before = np.count_nonzero(thresholded[thresholded == 1])
-        trimmed_data = funclib.trim_interganules(thresholded, mark=True)
-        granules_after = np.count_nonzero(trimmed_data[trimmed_data == 1])
+        middles_marked = funclib.trim_interganules(thresholded, mark=True)
+        granules_after = np.count_nonzero(middles_marked[middles_marked == 1])
 
         self.assertEqual(granules_before, granules_after)
 
