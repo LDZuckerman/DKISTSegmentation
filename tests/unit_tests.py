@@ -204,7 +204,8 @@ class TestUtils(unittest.TestCase):
 
         # new positive test: mark erronous material, not remove.
         middles_marked = funclib.trim_interganules(thresholded, mark=True)
-        marked_erroneous = np.count_nonzero(middles_marked[middles_marked == 2])
+        marked_erroneous =\
+            np.count_nonzero(middles_marked[middles_marked == 2])
 
         self.assertNotEqual(marked_erroneous, 0)
 
