@@ -190,7 +190,7 @@ class TestUtils(unittest.TestCase):
                           self.test_method)
 
     def test_trim_interganules(self):
-        """ Unit tests for trim_interganules() function
+        """ Unit tests for trim_intergranules() function
         """
 
         # -------- positive tests -------- :
@@ -201,6 +201,14 @@ class TestUtils(unittest.TestCase):
         # check that the correct dimensions are returned
         self.assertEqual(thresholded.shape,
                          funclib.trim_interganules(thresholded).shape)
+
+        # new positive test: mark erronous material, not remove.
+        middles_marked =\
+            funclib.trim_interganules(thresholded, mark=True)
+        marked_erroneous =\
+            np.count_nonzero(middles_marked[middles_marked == 2])
+
+        self.assertNotEqual(marked_erroneous, 0)
 
         # -------- negative tests -------- :
         # check that the returned array has fewer (or same number)

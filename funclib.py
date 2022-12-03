@@ -330,7 +330,7 @@ def get_threshold(data, method):
     return threshold
 
 
-def trim_interganules(segmented_image):
+def trim_interganules(segmented_image, mark=False):
     """
     Remove the erronous idenfication of intergranule material in the
     middle of granules that pure threshold segmentation produces.
@@ -338,6 +338,8 @@ def trim_interganules(segmented_image):
     Parameters:
         segmented_image (numpy array): the segmented image containing
                                        incorrect middles
+        mark (bool): if false, remove erronous intergranules. If true,
+                     mark them as 2 instead.
     ----------
     Returns:
         segmented_image_fixed (numpy array): the segmented image without
@@ -359,7 +361,10 @@ def trim_interganules(segmented_image):
     # set all other 0 regions to 1
     for value in values:
         if value != real_IG_value:
-            segmented_image_fixed[labeled_seg == value] = 1
+            if not mark:
+                segmented_image_fixed[labeled_seg == value] = 1
+            elif mark:
+                segmented_image_fixed[labeled_seg == value] = 2
 
     return segmented_image_fixed
 
@@ -560,9 +565,9 @@ def cross_correlation(segment1, segment2):
             elif segment1[i, j] == 0 and segment2[i, j] == 0:
                 intergranule_agreement_count += 1
 
-    percentage_agreement_granules =\
+    percentage_agreement_granules = \
         granule_agreement_count / total_granules
-    percentage_agreement_intergranules =\
+    percentage_agreement_intergranules = \
         intergranule_agreement_count / total_intergranules
 
     if percentage_agreement_granules < 0.75 \
