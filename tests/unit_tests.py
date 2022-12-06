@@ -20,7 +20,9 @@ class TestUtils(unittest.TestCase):
         """ Set up for unit testing by creating toy data
         """
         cls.ibis_testfile = 'data/IBIS/IBIS_example.sav'
+        cls.ibis_res = 0.096
         cls.dkist_testfile = 'data/DKIST/DKIST_example.fits'
+        cls.dkist_res = 0.016
         cls.dkist_fileid = 'DKIST_example'
         cls.ibis_fileid = 'IBIS_example'
         cls.test_instrument = 'IBIS'
@@ -134,7 +136,8 @@ class TestUtils(unittest.TestCase):
         # check that the returned type is correct
         data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
         segmented = funclib.segment(self.ibis_fileid, data_map,
-                                    self.test_method, out_dir='test_output/')
+                                    self.test_method,  True, 'test_output/',
+                                    self.ibis_res)
         test_type = type(segmented)
         self.assertEqual(test_type, sunpy.map.mapbase.GenericMap)
         # get an array of pixel values and check it is not empty
@@ -232,12 +235,13 @@ class TestUtils(unittest.TestCase):
         thresholded = np.uint8(data_map.data > np.nanmedian(data_map.data))
         faculae_marked = funclib.mark_faculae(thresholded,
                                               data_map.data,
-                                              res='IBIS')
+                                              res=self.ibis_res)
+
         # check that the correct dimensions are returned
         self.assertEqual(thresholded.shape,
                          faculae_marked.shape)
         # check that returned array is not empty
-        self.assertTrue(np.size(thresholded) > 0)
+        self.assertTrue(np.size(faculae_marked) > 0)
 
         # -------- negative tests -------- :
         # check that the returned array has some 0.5 values (for a dataset
@@ -249,7 +253,7 @@ class TestUtils(unittest.TestCase):
                           funclib.mark_faculae,
                           data_map.data,
                           data_map.data,
-                          res='IBIS')
+                          res=self.ibis_res)
 
     def test_save_to_fits(self):
         """ Unit tests for save_to_fits() function
@@ -259,7 +263,9 @@ class TestUtils(unittest.TestCase):
         segmented_map = funclib.segment(self.ibis_fileid,
                                         data_map,
                                         self.test_method,
-                                        out_dir='test_output/')
+                                        True,
+                                        'test_output/',
+                                        self.ibis_res)
         funclib.save_to_fits(segmented_map, data_map, 'test_output.fits',
                              'output/', self.test_header)
         path = pl.Path('output/test_output.fits')
@@ -329,7 +335,9 @@ class TestUtils(unittest.TestCase):
         segmented_map = funclib.segment(self.ibis_fileid,
                                         data_map,
                                         self.test_method,
-                                        out_dir='test_output/')
+                                        True,
+                                        'test_output/',
+                                        self.ibis_res)
         out_file_path = 'test_outputs/velocity_comparison.png'
         funclib.overplot_velocities(segmented_map,
                                     self.ibis_testsfile,

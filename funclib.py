@@ -64,6 +64,7 @@ def save_to_fits(segmented_map, data_map, out_file, out_dir, header):
         None: creates fits file with first extension being the
               segmented map and second extension being the input map
     """
+
     if not os.path.exists(out_dir):
         try:
             os.mkdir(out_dir)
@@ -127,7 +128,7 @@ def sav_to_map(filename, field):
     # imposed by sunpy on header field types and formats. No empty or
     # None fields are permitted by sunpy.Map creation function.
     print('WARNING: .sav input file contains no header; generating ' +
-          ' placeholder header in sunpy.Map object.')
+          'placeholder header in sunpy.Map object.')
     coord = SkyCoord(np.nan * u.arcsec,
                      np.nan * u.arcsec,
                      obstime='1111-11-11 11:11',
@@ -208,7 +209,7 @@ def sav_to_numpy(filename, instrument, field):
 
 
 def segment(file_id, data_map, skimage_method, plot_intermed=True,
-            out_dir='output/', res='DKIST'):
+            out_dir='output/', res=0.016):
     """
     Segment optical image of the solar photosphere into tri-value maps
     with 0 = inter-granule, 0.5 = faculae, 1 = granule.
@@ -224,8 +225,7 @@ def segment(file_id, data_map, skimage_method, plot_intermed=True,
         out_dir (str): Desired directory in which to save intermediate data
                                 product image (if plot_intermed = True);
                                 eventually to be a spatial resolution value
-        res (str): Currently a string indicating DKIST or IBIS resolution;
-                                eventually will be a resolution value
+         res (float): Spatial resolution (arcsec/pixel) of the data
     ----------
     Returns:
         data_map (SunPy map): SunPy map containing segmentated image (with the
@@ -389,20 +389,16 @@ def mark_faculae(segmented_image, data, res):
         data (numpy array): the original flux values
         segmented_image (numpy array): the segmented image containing
                                 incorrect middles
-        res (str): Currently a string indicating DKIST or IBIS resolution;
-                                eventually will be a resolution value
+        res (float): Spatial resolution (arcsec/pixel) of the data
     ----------
     Returns:
         segmented_image_fixed (numpy array): the segmented image with faculae
                                              marked as 0.5
     """
 
-    if res == 'DKIST':
-        fac_size_limit = 250  # number of pixels criterion for faculae
-        fac_brightness_limit = 5000  # flux/pix criterion for faculae
-    if res == 'IBIS':
-        fac_size_limit = 20  # number of pixels criterion for faculae
-        fac_brightness_limit = 3000  # flux/pix criterion for faculae
+    fac_size_limit = 2  # max size of a faculae in sqaure arcsec
+    fac_pix_limit = fac_size_limit/res
+    fac_brightness_limit = np.mean(data)+0.5*np.std(data)
 
     if len(np.unique(segmented_image)) > 2:
         raise ValueError('segmented_image must have only values of 1 and 0')
@@ -419,7 +415,7 @@ def mark_faculae(segmented_image, data, res):
             region_size = len(segmented_image_fixed[mask == 1])
             tot_flux = np.sum(data[mask == 1])
             # check that region is small
-            if region_size < fac_size_limit:
+            if region_size < fac_pix_limit:
                 # check that avg flux very high
                 if tot_flux / region_size > fac_brightness_limit:
                     segmented_image_fixed[mask == 1] = 0.5

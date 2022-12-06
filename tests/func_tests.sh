@@ -1,12 +1,13 @@
 test -e ssshtest || wget -q https://raw.githubusercontent.com/ryanlayer/ssshtest/master/ssshtest
 . ssshtest
 
-   
+     
 # --------------- Checks for running on IBIS data ------------------ #
 # check run on IBIS data, with velocity comparison 
 test_dir='/output_IBIS_test'
 run test_segment_ibis python segment.py \
     --data_path 'data/IBIS' \
+    --resolution 0.096 \
     --skimage_method 'li' \
     --plot_intermed True \
     --out_file 'output' \
@@ -53,9 +54,10 @@ rm -r $curr_dir$test_dir
 
 
 # --------------- Checks for running on DKIST data ------------------ #
-# check run on IBIS data, with velocity comparison 
+# check run on DKIST data, with velocity comparison 
 test_dir='/output_DKIST_test'
 run test_segment_dkist python segment.py \
+    --resolution 0.016 \
     --data_path 'data/DKIST' \
     --skimage_method 'li' \
     --plot_intermed True \
