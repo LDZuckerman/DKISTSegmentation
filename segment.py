@@ -65,7 +65,7 @@ def main():
         if input_file.endswith('.sav'):
             data_map = funclib.sav_to_map(data_path + '/' + input_file,
                                           dkist_band)
-            header = None         
+            header = None
         elif input_file.endswith('.fits'):
             data_map = funclib.fits_to_map(data_path + '/' + input_file)
             header = fits.open(data_path + '/' + input_file)[0].header

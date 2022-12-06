@@ -73,18 +73,17 @@ def save_to_fits(segmented_map, data_map, out_file, out_dir, header):
         raise TypeError('Appears that out_dir or out_file are not strings')
 
     try:
-        #segmented_map.save(filename, overwrite=True)
         if header is not None:
-            seg_hdu = fits.PrimaryHDU(segmented_map.data, header) 
+            seg_hdu = fits.PrimaryHDU(segmented_map.data, header)
         else:
-            seg_hdu = fits.PrimaryHDU(segmented_map.data) 
+            seg_hdu = fits.PrimaryHDU(segmented_map.data)
         raw_hdu = fits.ImageHDU(data_map.data)
-        hdu = fits.HDUList([seg_hdu, raw_hdu]
+        hdu = fits.HDUList([seg_hdu, raw_hdu])
     except Exception:
         raise TypeError('Segmented_map must be a sunpy map')
 
-    #fits.append(filename, data_map.data)
     hdu.writeto(filename, overwrite=True)
+
 
 def sav_to_map(filename, field):
     """
@@ -113,20 +112,22 @@ def sav_to_map(filename, field):
     # Sunpy absolutely requires that a header be present in all sunpy.Map
     # objects. Becuase .sav files do not contain header information, create
     # as generic a header as possible given the strict requirements
-    # imposed by sunpy on header feild types and formats. No empty or
+    # imposed by sunpy on header field types and formats. No empty or
     # None fields are permitted by sunpy.Map creation function.
     print('WARNING: .sav input file contains no header; generating ' +
           ' placeholder header in sunpy.Map object.')
     coord = SkyCoord(np.nan * u.arcsec,
-                      np.nan * u.arcsec,
-                      obstime='1111-11-11 11:11',
-                      observer='earth',
-                      frame=frames.Helioprojective)
+                     np.nan * u.arcsec,
+                     obstime='1111-11-11 11:11',
+                     observer='earth',
+                     frame=frames.Helioprojective)
     header = \
         sunpy.map.make_fitswcs_header(data=np.empty((0, 0)),
                                       coordinate=coord,
-                                      reference_pixel=[np.nan, np.nan] * u.pixel,
-                                      scale=[np.nan, np.nan] * u.arcsec / u.pixel,
+                                      reference_pixel=[np.nan, np.nan]
+                                      * u.pixel,
+                                      scale=[np.nan, np.nan]
+                                      * u.arcsec / u.pixel,
                                       telescope='Unknown',
                                       instrument='Unknown',
                                       wavelength=np.nan * u.angstrom)
