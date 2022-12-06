@@ -389,20 +389,16 @@ def mark_faculae(segmented_image, data, res):
         data (numpy array): the original flux values
         segmented_image (numpy array): the segmented image containing
                                 incorrect middles
-        res (str): Currently a string indicating DKIST or IBIS resolution;
-                                eventually will be a resolution value
+        res (float): Spatial resolution (arcsec/pixel) of the data
     ----------
     Returns:
         segmented_image_fixed (numpy array): the segmented image with faculae
                                              marked as 0.5
     """
-
-    if res == 'DKIST':
-        fac_size_limit = 250  # number of pixels criterion for faculae
-        fac_brightness_limit = 5000  # flux/pix criterion for faculae
-    if res == 'IBIS':
-        fac_size_limit = 20  # number of pixels criterion for faculae
-        fac_brightness_limit = 3000  # flux/pix criterion for faculae
+   
+    fac_size_limit = 0.2 # faculae are no bigger than sqaure 0.2"
+    fac_pix_limit = fac_size_limit/res
+    fac_brightness_limit = 0.9*np.max(data)
 
     if len(np.unique(segmented_image)) > 2:
         raise ValueError('segmented_image must have only values of 1 and 0')
@@ -419,13 +415,12 @@ def mark_faculae(segmented_image, data, res):
             region_size = len(segmented_image_fixed[mask == 1])
             tot_flux = np.sum(data[mask == 1])
             # check that region is small
-            if region_size < fac_size_limit:
+            if region_size < fac_pix_limit:
                 # check that avg flux very high
                 if tot_flux / region_size > fac_brightness_limit:
                     segmented_image_fixed[mask == 1] = 0.5
 
     return segmented_image_fixed
-
 
 def find_data(filepath):
     """

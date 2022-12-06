@@ -12,6 +12,12 @@ def main():
                         help='filepath to directory containing data to ' +
                         'be segmented.',
                         required=True)
+    parser.add_argument('--resolution',
+                        dest='resolution',
+                        type=float,
+                        help='resolution (arcseconds/pixel) of data in ' +
+                        'input directory.',
+                        required=True)
     parser.add_argument('--skimage_method', dest='skimage_method',
                         type=str,
                         help='Skimage method to use for initial thresholding',
@@ -44,6 +50,7 @@ def main():
 
     args = parser.parse_args()
     data_path = args.data_path
+    res =  float(args.resolution)
     skimage_method = args.skimage_method
     out_dir = args.out_dir
     out_file = args.out_file
@@ -69,17 +76,6 @@ def main():
         elif input_file.endswith('.fits'):
             data_map = funclib.fits_to_map(data_path + '/' + input_file)
             header = fits.open(data_path + '/' + input_file)[0].header
-
-        # check for res flags
-        if "dkist" in input_file.lower():
-            res = "DKIST"
-        elif "ibis" in input_file.lower():
-            res = "IBIS"
-        else:
-            print('Currently file name must contain "dkist" or "ibis", for ' +
-                  'proper faculae detection. This will be updated in a ' +
-                  'later version. Defaulting to DKIST.')
-            res = "DKIST"
 
         # apply segmentation pipeline
         segmented_map = funclib.segment(file_id,
