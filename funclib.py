@@ -47,7 +47,7 @@ def open_file(filename):
     return
 
 
-def save_to_fits(segmented_map, data_map, out_file, out_dir):
+def save_to_fits(segmented_map, data_map, out_file, out_dir, header):
     """
     Save input sunpy map and output segmented sunpy map to fits file
     ----------
@@ -56,6 +56,7 @@ def save_to_fits(segmented_map, data_map, out_file, out_dir):
         data_map (sunpy map): input data
         out_file (str): desired name of output fits file
         out_dir (str): filepath for the fits file
+        header (fits header object or None): header to use for output fits file
     ----------
     Returns:
         None: creates fits file with first extension being the
@@ -72,12 +73,18 @@ def save_to_fits(segmented_map, data_map, out_file, out_dir):
         raise TypeError('Appears that out_dir or out_file are not strings')
 
     try:
-        segmented_map.save(filename, overwrite=True)
+        #segmented_map.save(filename, overwrite=True)
+        if header is not None:
+            seg_hdu = fits.PrimaryHDU(segmented_map.data, header) 
+        else:
+            seg_hdu = fits.PrimaryHDU(segmented_map.data) 
+        raw_hdu = fits.ImageHDU(data_map.data)
+        hdu = fits.HDUList([seg_hdu, raw_hdu]
     except Exception:
-        raise TypeError('segmented_map must be a sunpy map')
+        raise TypeError('Segmented_map must be a sunpy map')
 
-    fits.append(filename, data_map.data)
-
+    #fits.append(filename, data_map.data)
+    hdu.writeto(filename, overwrite=True)
 
 def sav_to_map(filename, field):
     """
@@ -103,21 +110,28 @@ def sav_to_map(filename, field):
         raise Exception('Field ' + field +
                         ' is not in file keys ', data.keys())
 
-    fake_coord = SkyCoord(0 * u.arcsec,
-                          0 * u.arcsec,
-                          obstime='2013-10-28 08:24',
-                          observer='earth',
-                          frame=frames.Helioprojective)
-    fake_header = \
-        sunpy.map.make_fitswcs_header(data=np.empty((512, 512)),
-                                      coordinate=fake_coord,
-                                      reference_pixel=[0, 0] * u.pixel,
-                                      scale=[2, 2] * u.arcsec / u.pixel,
-                                      telescope='Fake Telescope',
-                                      instrument='Fake Instrument',
-                                      wavelength=1000 * u.angstrom)
+    # Sunpy absolutely requires that a header be present in all sunpy.Map
+    # objects. Becuase .sav files do not contain header information, create
+    # as generic a header as possible given the strict requirements
+    # imposed by sunpy on header feild types and formats. No empty or
+    # None fields are permitted by sunpy.Map creation function.
+    print('WARNING: .sav input file contains no header; generating ' +
+          ' placeholder header in sunpy.Map object.')
+    coord = SkyCoord(np.nan * u.arcsec,
+                      np.nan * u.arcsec,
+                      obstime='1111-11-11 11:11',
+                      observer='earth',
+                      frame=frames.Helioprojective)
+    header = \
+        sunpy.map.make_fitswcs_header(data=np.empty((0, 0)),
+                                      coordinate=coord,
+                                      reference_pixel=[np.nan, np.nan] * u.pixel,
+                                      scale=[np.nan, np.nan] * u.arcsec / u.pixel,
+                                      telescope='Unknown',
+                                      instrument='Unknown',
+                                      wavelength=np.nan * u.angstrom)
 
-    data_map = sunpy.map.Map(data[field], fake_header)
+    data_map = sunpy.map.Map(data[field], header)
 
     return data_map
 
@@ -130,7 +144,7 @@ def fits_to_map(filename):
         filename (string): Path to input data file (.fits format)
     ----------
     Returns:
-        data: SunPy map containing the data and arbitrary coordinate header
+        data: SunPy map containing the data and header
     """
 
     try:
@@ -141,21 +155,7 @@ def fits_to_map(filename):
     except Exception:
         raise Exception('Data does not appear to be in correct .fits format')
 
-    fake_coord = SkyCoord(0 * u.arcsec,
-                          0 * u.arcsec,
-                          obstime='2013-10-28 08:24',
-                          observer='earth',
-                          frame=frames.Helioprojective)
-    fake_header = \
-        sunpy.map.make_fitswcs_header(data=np.empty((512, 512)),
-                                      coordinate=fake_coord,
-                                      reference_pixel=[0, 0] * u.pixel,
-                                      scale=[2, 2] * u.arcsec / u.pixel,
-                                      telescope='Fake Telescope',
-                                      instrument='Fake Instrument',
-                                      wavelength=1000 * u.angstrom)
-
-    data_map = sunpy.map.Map(data, fake_header)
+    data_map = sunpy.map.Map(filename)
 
     return data_map
 
@@ -188,7 +188,6 @@ def sav_to_numpy(filename, instrument, field):
         raise Exception('Field ' + field + ' is not in file keys ',
                         data.keys())
 
-    # TO DO: catch error if file is not in sav format
     file = sio.readsav(filename)
     data = file[field]
 
