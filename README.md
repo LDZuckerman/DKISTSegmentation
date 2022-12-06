@@ -92,14 +92,16 @@ The outputs of this example call are located in the `example_outputs\DKIST` dire
 
 ## Warning messages
 
-When running the above on IBIS data, you may see several warning messages about 'dubious year' from the sunpy ERFA function. 
-*These can be safely ignored.* Sunpy absolutely requires that a header be present in all sunpy.Map objects. Becuase .sav files do
+When running the above on IBIS data, you may see a warning messages about 'dubious year' from the sunpy ERFA function. 
+*This can be safely ignored.* Sunpy absolutely requires that a header be present in all sunpy.Map objects. Becuase .sav files do
 not contain header information, when the input file is in the .sav format we create as generic a header as possible given the strict
 requirements imposed by sunpy on header field types and formats. No empty or None fields are permitted by sunpy.Map creation function. 
 The warning messages simply note that the placeholder date in the header is not a true data value.
+Currently, these warning messages are suppressed and the user should only see one line containing a reminder that .sav files have
+no header, and thus a placeholder header has been generated.
 
 You may also see a UserWarning from matplotlib stating that no contour levels were found within the data range. *This can also be
-safely ignored.* 
+safely ignored.* Currently, these warning messages are suppressed for clarity of output.
 
 
 ## Thresholding methods
