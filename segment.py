@@ -50,7 +50,7 @@ def main():
 
     args = parser.parse_args()
     data_path = args.data_path
-    res =  float(args.resolution)
+    res = float(args.resolution)
     skimage_method = args.skimage_method
     out_dir = args.out_dir
     out_file = args.out_file
