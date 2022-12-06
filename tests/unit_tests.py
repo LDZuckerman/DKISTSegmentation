@@ -27,6 +27,7 @@ class TestUtils(unittest.TestCase):
         cls.dkist_instrument = 'DKIST'
         cls.test_method = 'li'
         cls.test_band = 'rosa_gband'
+        cls.test_header = None
 
     @classmethod
     def tearDownClass(cls):
@@ -259,15 +260,14 @@ class TestUtils(unittest.TestCase):
                                         data_map,
                                         self.test_method,
                                         out_dir='test_output/')
-        funclib.save_to_fits(segmented_map, data_map,
-                             'test_output.fits',
-                             'output/')
+        funclib.save_to_fits(segmented_map, data_map, 'test_output.fits',
+                             'output/', self.test_header)
         path = pl.Path('output/test_output.fits')
         read_seg_data = fits.open('output/test_output.fits')[0].data
         read_data = fits.open('output/test_output.fits')[1].data
 
         # positive tests
-        # check that fits file gets created and two data is correct
+        # check that fits file gets created and two data fields are correct
         self.assertTrue(os.path.exists(path))
         self.assertTrue(np.array_equal(read_seg_data, segmented_map.data))
         self.assertTrue(np.array_equal(read_data, data_map.data))
@@ -279,16 +279,13 @@ class TestUtils(unittest.TestCase):
 
         # error raising tests
         self.assertRaises(TypeError,
-                          funclib.save_to_fits,
-                          data_map.data, segmented_map,
-                          'test_output.fits',
-                          'output/')
+                          funclib.save_to_fits, data_map.data,
+                          segmented_map, 'test_output.fits',
+                          'output/', self.test_header)
         self.assertRaises(TypeError,
-                          funclib.save_to_fits,
-                          data_map,
-                          segmented_map,
-                          'test_output.fits',
-                          4)
+                          funclib.save_to_fits, data_map,
+                          segmented_map, 'test_output.fits',
+                          4, self.test_header)
 
         os.remove('output/test_output.fits')
 
