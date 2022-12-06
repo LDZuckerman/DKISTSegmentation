@@ -80,8 +80,6 @@ python segment.py
     --out_file 'segmented_data.fits' 
     --out_dir 'output_DKIST/'
 ```
-The outputs of these example calls are located in the `example_outputs\IBIS` and 
-`example_outputs\DKIST` directories.
 
 where the arugments are \
 `data_path`: Filepath to directory containing data to be segmented\
@@ -92,7 +90,8 @@ where the arugments are \
 `vel_comparison_file`: (Optional) Desired name of output image file containing segmented contours overplotted on velocity data.\
 `out_dir`: (Optional) Desired directory in which to save out_file.
 
-The outputs of this example call are located in the `example_outputs\DKIST` directory.
+The outputs of these example calls are located in the `example_outputs\IBIS` and 
+`example_outputs\DKIST` directories.
 
 ## Warning messages
 
