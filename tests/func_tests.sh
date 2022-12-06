@@ -55,7 +55,7 @@ rm -r $curr_dir$test_dir
 # --------------- Checks for running on DKIST data ------------------ #
 # check run on IBIS data, with velocity comparison 
 test_dir='/output_DKIST_test'
-run test_segment_ibis python segment.py \
+run test_segment_dkist python segment.py \
     --data_path 'data/DKIST' \
     --skimage_method 'li' \
     --plot_intermed True \
