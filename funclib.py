@@ -17,6 +17,8 @@ from sunpy.map import make_fitswcs_header
 from matplotlib.lines import Line2D
 import sys
 from sklearn.cluster import KMeans as KMeans
+import warnings
+from erfa import ErfaWarning
 
 
 def open_file(filename):
@@ -102,6 +104,10 @@ def sav_to_map(filename, field):
     Returns:
         data: SunPy map containing the data and arbitrary coordinate header
     """
+
+    # Suppress harmless warning about 'bad' placeholder date in
+    # placeholder header (see comment below)
+    warnings.filterwarnings(action='ignore', category=ErfaWarning)
 
     try:
         data = sio.readsav(filename)
@@ -456,6 +462,9 @@ def overplot_velocities(seg_map, input_file, output_path):
     Returns:
         None; saves outplot plot
     """
+
+    # Suppress harmless warning from plt.contour
+    warnings.filterwarnings(action='ignore', category=UserWarning)
 
     if input_file.endswith('.sav'):
         file = sio.readsav(input_file)
