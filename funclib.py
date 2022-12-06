@@ -72,6 +72,12 @@ def save_to_fits(segmented_map, data_map, out_file, out_dir, header):
     except Exception:
         raise TypeError('Appears that out_dir or out_file are not strings')
 
+    if not type(data_map) == sunpy.map.mapbase.GenericMap:
+        raise TypeError('data_map must be a sunpy map')
+
+    if not type(segmented_map) == sunpy.map.mapbase.GenericMap:
+        raise TypeError('segmented_map must be a sunpy map')
+
     try:
         if header is not None:
             seg_hdu = fits.PrimaryHDU(segmented_map.data, header)
