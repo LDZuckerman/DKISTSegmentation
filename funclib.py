@@ -17,6 +17,8 @@ from sunpy.map import make_fitswcs_header
 from matplotlib.lines import Line2D
 import sys
 from sklearn.cluster import KMeans as KMeans
+import warnings
+from erfa import ErfaWarning
 
 
 def open_file(filename):
@@ -47,7 +49,7 @@ def open_file(filename):
     return
 
 
-def save_to_fits(segmented_map, data_map, out_file, out_dir):
+def save_to_fits(segmented_map, data_map, out_file, out_dir, header):
     """
     Save input sunpy map and output segmented sunpy map to fits file
     ----------
@@ -56,6 +58,7 @@ def save_to_fits(segmented_map, data_map, out_file, out_dir):
         data_map (sunpy map): input data
         out_file (str): desired name of output fits file
         out_dir (str): filepath for the fits file
+        header (fits header object or None): header to use for output fits file
     ----------
     Returns:
         None: creates fits file with first extension being the
@@ -71,12 +74,23 @@ def save_to_fits(segmented_map, data_map, out_file, out_dir):
     except Exception:
         raise TypeError('Appears that out_dir or out_file are not strings')
 
-    try:
-        segmented_map.save(filename, overwrite=True)
-    except Exception:
+    if not type(data_map) == sunpy.map.mapbase.GenericMap:
+        raise TypeError('data_map must be a sunpy map')
+
+    if not type(segmented_map) == sunpy.map.mapbase.GenericMap:
         raise TypeError('segmented_map must be a sunpy map')
 
-    fits.append(filename, data_map.data)
+    try:
+        if header is not None:
+            seg_hdu = fits.PrimaryHDU(segmented_map.data, header)
+        else:
+            seg_hdu = fits.PrimaryHDU(segmented_map.data)
+        raw_hdu = fits.ImageHDU(data_map.data)
+        hdu = fits.HDUList([seg_hdu, raw_hdu])
+    except Exception:
+        raise TypeError('Segmented_map must be a sunpy map')
+
+    hdu.writeto(filename, overwrite=True)
 
 
 def sav_to_map(filename, field):
@@ -91,6 +105,10 @@ def sav_to_map(filename, field):
         data: SunPy map containing the data and arbitrary coordinate header
     """
 
+    # Suppress harmless warning about 'bad' placeholder date in
+    # placeholder header (see comment below)
+    warnings.filterwarnings(action='ignore', category=ErfaWarning)
+
     try:
         data = sio.readsav(filename)
     except FileNotFoundError:
@@ -103,21 +121,30 @@ def sav_to_map(filename, field):
         raise Exception('Field ' + field +
                         ' is not in file keys ', data.keys())
 
-    fake_coord = SkyCoord(0 * u.arcsec,
-                          0 * u.arcsec,
-                          obstime='2013-10-28 08:24',
-                          observer='earth',
-                          frame=frames.Helioprojective)
-    fake_header = \
-        sunpy.map.make_fitswcs_header(data=np.empty((512, 512)),
-                                      coordinate=fake_coord,
-                                      reference_pixel=[0, 0] * u.pixel,
-                                      scale=[2, 2] * u.arcsec / u.pixel,
-                                      telescope='Fake Telescope',
-                                      instrument='Fake Instrument',
-                                      wavelength=1000 * u.angstrom)
+    # Sunpy absolutely requires that a header be present in all sunpy.Map
+    # objects. Becuase .sav files do not contain header information, create
+    # as generic a header as possible given the strict requirements
+    # imposed by sunpy on header field types and formats. No empty or
+    # None fields are permitted by sunpy.Map creation function.
+    print('WARNING: .sav input file contains no header; generating ' +
+          ' placeholder header in sunpy.Map object.')
+    coord = SkyCoord(np.nan * u.arcsec,
+                     np.nan * u.arcsec,
+                     obstime='1111-11-11 11:11',
+                     observer='earth',
+                     frame=frames.Helioprojective)
+    header = \
+        sunpy.map.make_fitswcs_header(data=np.empty((0, 0)),
+                                      coordinate=coord,
+                                      reference_pixel=[np.nan, np.nan]
+                                      * u.pixel,
+                                      scale=[np.nan, np.nan]
+                                      * u.arcsec / u.pixel,
+                                      telescope='Unknown',
+                                      instrument='Unknown',
+                                      wavelength=np.nan * u.angstrom)
 
-    data_map = sunpy.map.Map(data[field], fake_header)
+    data_map = sunpy.map.Map(data[field], header)
 
     return data_map
 
@@ -130,7 +157,7 @@ def fits_to_map(filename):
         filename (string): Path to input data file (.fits format)
     ----------
     Returns:
-        data: SunPy map containing the data and arbitrary coordinate header
+        data: SunPy map containing the data and header
     """
 
     try:
@@ -141,21 +168,7 @@ def fits_to_map(filename):
     except Exception:
         raise Exception('Data does not appear to be in correct .fits format')
 
-    fake_coord = SkyCoord(0 * u.arcsec,
-                          0 * u.arcsec,
-                          obstime='2013-10-28 08:24',
-                          observer='earth',
-                          frame=frames.Helioprojective)
-    fake_header = \
-        sunpy.map.make_fitswcs_header(data=np.empty((512, 512)),
-                                      coordinate=fake_coord,
-                                      reference_pixel=[0, 0] * u.pixel,
-                                      scale=[2, 2] * u.arcsec / u.pixel,
-                                      telescope='Fake Telescope',
-                                      instrument='Fake Instrument',
-                                      wavelength=1000 * u.angstrom)
-
-    data_map = sunpy.map.Map(data, fake_header)
+    data_map = sunpy.map.Map(filename)
 
     return data_map
 
@@ -188,7 +201,6 @@ def sav_to_numpy(filename, instrument, field):
         raise Exception('Field ' + field + ' is not in file keys ',
                         data.keys())
 
-    # TO DO: catch error if file is not in sav format
     file = sio.readsav(filename)
     data = file[field]
 
@@ -450,6 +462,9 @@ def overplot_velocities(seg_map, input_file, output_path):
     Returns:
         None; saves outplot plot
     """
+
+    # Suppress harmless warning from plt.contour
+    warnings.filterwarnings(action='ignore', category=UserWarning)
 
     if input_file.endswith('.sav'):
         file = sio.readsav(input_file)
