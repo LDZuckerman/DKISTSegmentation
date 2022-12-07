@@ -147,9 +147,9 @@ def sav_to_map(filename, field):
         sunpy.map.make_fitswcs_header(data=np.empty((0, 0)),
                                       coordinate=coord,
                                       reference_pixel=[np.nan, np.nan]
-                                      * u.pixel,
+                                                      * u.pixel,
                                       scale=[np.nan, np.nan]
-                                      * u.arcsec / u.pixel,
+                                            * u.arcsec / u.pixel,
                                       telescope='Unknown',
                                       instrument='Unknown',
                                       wavelength=np.nan * u.angstrom)
@@ -405,8 +405,8 @@ def mark_faculae(segmented_image, data, res):
     """
 
     fac_size_limit = 2  # max size of a faculae in sqaure arcsec
-    fac_pix_limit = fac_size_limit/res
-    fac_brightness_limit = np.mean(data)+0.5*np.std(data)
+    fac_pix_limit = fac_size_limit / res
+    fac_brightness_limit = np.mean(data) + 0.5 * np.std(data)
 
     if len(np.unique(segmented_image)) > 2:
         raise ValueError('segmented_image must have only values of 1 and 0')
@@ -590,13 +590,16 @@ def cross_correlation(segment1, segment2):
         granule_agreement_count / total_granules
     percentage_agreement_intergranules = \
         intergranule_agreement_count / total_intergranules
+    try:
+        confidence = np.mean(percentage_agreement_granules,
+                             percentage_agreement_intergranules)
+    except TypeError:
+        confidence = 0
 
     if percentage_agreement_granules < 0.75 \
             or percentage_agreement_intergranules < 0.75:
         print('Low agreement with K-Means clustering. \
                          Saved output has low confidence.')
-        return [-1, np.mean(percentage_agreement_granules,
-                            percentage_agreement_intergranules)]
+        return [-1, confidence]
     else:
-        return [0, np.mean(percentage_agreement_granules,
-                           percentage_agreement_intergranules)]
+        return [0, confidence]
