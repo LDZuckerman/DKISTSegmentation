@@ -323,7 +323,7 @@ class TestUtils(unittest.TestCase):
         # error handling case: that it errors if filepath passed
         # doesn't include data:
         os.mkdir(fake_dir_2)
-        self.assertRaises(Exception, funclib.find_data(fake_dir_2))
+        self.assertRaises(OSError, funclib.find_data(fake_dir_2))
 
         shutil.rmtree(fake_dir)
         shutil.rmtree(fake_dir_2)

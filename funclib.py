@@ -147,9 +147,9 @@ def sav_to_map(filename, field):
         sunpy.map.make_fitswcs_header(data=np.empty((0, 0)),
                                       coordinate=coord,
                                       reference_pixel=[np.nan, np.nan]
-                                                      * u.pixel,
+                                      * u.pixel,
                                       scale=[np.nan, np.nan]
-                                            * u.arcsec / u.pixel,
+                                      * u.arcsec / u.pixel,
                                       telescope='Unknown',
                                       instrument='Unknown',
                                       wavelength=np.nan * u.angstrom)
