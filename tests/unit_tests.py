@@ -298,6 +298,11 @@ class TestUtils(unittest.TestCase):
 
     def test_find_files(self):
         fake_dir = './test_dir/'
+        fake_dir_2 = './test_dir_2/'
+        try:
+            shutil.rmtree(fake_dir)
+        try:
+            shutil.rmtree(fake_dir_2)
         os.mkdir(fake_dir)
         fake_data = np.empty((1, 1))
         fake_fits_name = 'test.fits'
@@ -309,7 +314,6 @@ class TestUtils(unittest.TestCase):
 
         # error handling case: that it errors if filepath passed
         # doesn't include data:
-        fake_dir_2 = './test_dir_2/'
         os.mkdir(fake_dir)
         self.assertRaises(Exception, funclib.find_data(fake_dir_2))
 
