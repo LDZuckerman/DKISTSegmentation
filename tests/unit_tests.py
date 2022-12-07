@@ -299,10 +299,18 @@ class TestUtils(unittest.TestCase):
     def test_find_files(self):
         fake_dir = './test_dir/'
         fake_dir_2 = './test_dir_2/'
+        # this is probably not best practice, but the yml workflow is
+        # OCCASIONALLY running out of time and not removing these
+        # folders, which causes an error next time it is run.
+        # For that reason, I need to try to remove them first thing.
         try:
             shutil.rmtree(fake_dir)
+        except FileNotFoundError:
+            pass
         try:
             shutil.rmtree(fake_dir_2)
+        except FileNotFoundError:
+            pass
         os.mkdir(fake_dir)
         fake_data = np.empty((1, 1))
         fake_fits_name = 'test.fits'
