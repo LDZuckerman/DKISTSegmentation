@@ -320,6 +320,14 @@ class TestUtils(unittest.TestCase):
         # positive test 1: that it can find a fits file in a directory
         self.assertEqual(fake_fits_name, found_fits[0])
 
+        # negative test 1: test that it doens't find files outside the scope
+        # of the given dataset:
+        fake_fits_name_2 = 'test2.fits'
+        fits.writeto('./' + fake_fits_name_2, fake_data)
+        self.assertNotIn(fake_fits_name_2, funclib.find_data(fake_dir))
+
+        os.remove('./' + fake_fits_name_2)
+
         # error handling case: that it errors if filepath passed
         # doesn't include data:
         os.mkdir(fake_dir_2)
