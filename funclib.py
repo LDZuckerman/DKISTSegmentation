@@ -94,7 +94,7 @@ def save_to_fits(segmented_map,
             seg_hdu = fits.PrimaryHDU(segmented_map.data, header)
         else:
             seg_hdu = fits.PrimaryHDU(segmented_map.data)
-        seg_hdu.header.append(('KMEANS_CONFIDENCE', confidence))
+        seg_hdu.header.append(('CONFIDEN', confidence))
         raw_hdu = fits.ImageHDU(data_map.data)
         hdu = fits.HDUList([seg_hdu, raw_hdu])
     except Exception:
