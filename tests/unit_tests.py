@@ -350,6 +350,20 @@ class TestUtils(unittest.TestCase):
 
         self.assertEqual(np.shape(clustered_array)[0], N)
 
+        # negative test: that the returned labels don't contian a
+        # label they shouldn't (should only be 0 or 1)
+
+        non_label = 3
+        count_non_label_in_cluster =\
+            np.count_nonzero(clustered_array[clustered_array == non_label])
+        self.assertEqual(count_non_label_in_cluster, 0)
+
+        # An error handling case:
+        # should error if passed in data of wrong shape:
+        self.assertRaises(Exception,
+                          funclib.kmeans_cluster,
+                          array_to_be_clustered,
+                          3)
 
     def test_cross_correlation(self):
         # -------- positive tests -------- :
