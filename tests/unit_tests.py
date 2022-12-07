@@ -312,6 +312,9 @@ class TestUtils(unittest.TestCase):
         fake_dir_2 = './test_dir_2/'
         self.assertRaises(Exception, funclib.find_data(fake_dir_2))
 
+        shutil.rmtree(fake_dir)
+        shutil.rmtree(fake_dir_2)
+
     def test_cross_correlation(self):
         # -------- positive tests -------- :
         # positive test 1: if arrays agree, return 0:
