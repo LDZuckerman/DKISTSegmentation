@@ -266,8 +266,9 @@ class TestUtils(unittest.TestCase):
                                         True,
                                         'test_output/',
                                         self.ibis_res)
+        confidence = 0
         funclib.save_to_fits(segmented_map, data_map, 'test_output.fits',
-                             'output/', self.test_header)
+                             'output/', self.test_header, confidence)
         path = pl.Path('output/test_output.fits')
         read_seg_data = fits.open('output/test_output.fits')[0].data
         read_data = fits.open('output/test_output.fits')[1].data
@@ -287,17 +288,29 @@ class TestUtils(unittest.TestCase):
         self.assertRaises(TypeError,
                           funclib.save_to_fits, data_map.data,
                           segmented_map, 'test_output.fits',
-                          'output/', self.test_header)
+                          'output/', self.test_header, confidence)
         self.assertRaises(TypeError,
                           funclib.save_to_fits, data_map,
                           segmented_map, 'test_output.fits',
-                          4, self.test_header)
+                          4, self.test_header, confidence)
 
         os.remove('output/test_output.fits')
 
     def test_find_files(self):
-        self.assertTrue(True)
-        self.assertFalse(False)
+        fake_dir = './test_dir/'
+        os.mkdir(fake_dir)
+        fake_data = np.empty((1, 1))
+        fake_fits_name = 'test.fits'
+        fits.writeto(fake_dir + fake_fits_name, fake_data)
+
+        found_fits = funclib.find_data(fake_dir)
+        # positive test 1: that it can find a fits file in a directory
+        self.assertEqual(fake_fits_name, found_fits[0])
+
+        # error handling case: that it errors if filepath passed
+        # doesn't include data:
+        fake_dir_2 = './test_dir_2/'
+        self.assertRaises(Exception, funclib.find_data(fake_dir_2))
 
     def test_cross_correlation(self):
         # -------- positive tests -------- :
