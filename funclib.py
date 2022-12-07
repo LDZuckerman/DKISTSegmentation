@@ -447,10 +447,12 @@ def find_data(filepath):
                                                  to be segmented.
     """
     files_to_be_segmented = []
-    files = os.listdir(filepath)  # glob.glob(filepath + '**', recursive=True)
+    files = os.listdir(filepath)
     for file in files:
         if file.endswith('.fits') or file.endswith('.sav'):
             files_to_be_segmented.append(file)
+    if not files_to_be_segmented:
+        raise OSError('No data found in ' + filepath)
     return files_to_be_segmented
 
 
