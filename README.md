@@ -17,7 +17,9 @@ data to SunPy maps, and outputs are converted to SunPy maps as well.
 
 This repository will work correctly using the conda envrironment stored in the
 environment.yml file. To create this environment from this file, use 
-"conda env create -f environment.yml".
+"conda env create -f environment.yml". Equivalently, it's also possible to create 
+the environment using mambda, which produces the same effect, but a little faster. To do
+this, use "mamba create -f  environment.yml". 
 
 ## Input data
 

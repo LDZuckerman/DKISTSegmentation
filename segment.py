@@ -91,6 +91,16 @@ def main():
                                         data_path + '/' + input_file,
                                         out_dir + '/' + vel_comp_file + '_' +
                                         file_id + '.png')
+        # check out put via kmeans:
+        # still working on IBIS data:
+        if input_file.endswith('.fits'):
+            kmeans_labels = funclib.kmeans_cluster(data_map.data,
+                                                   llambda_axis=-1)
+            kmeans_return = funclib.cross_correlation(segmented_map.data,
+                                                      kmeans_labels)
+            confidence = kmeans_return[1]
+        else:
+            confidence = 0
 
         # save map as fits file
         if args.out_file is not None:
@@ -98,14 +108,8 @@ def main():
                                  data_map,
                                  out_file + '_' + file_id + '.fits',
                                  out_dir,
-                                 header)
-
-            # check out put via kmeans:
-            # still working on IBIS data:
-            if input_file.endswith('.fits'):
-                kmeans_labels = funclib.kmeans_cluster(data_map.data,
-                                                       llambda_axis=-1)
-                funclib.cross_correlation(segmented_map.data, kmeans_labels)
+                                 header,
+                                 confidence)
 
 
 if __name__ == "__main__":

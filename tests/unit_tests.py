@@ -266,8 +266,9 @@ class TestUtils(unittest.TestCase):
                                         True,
                                         'test_output/',
                                         self.ibis_res)
+        confidence = 0
         funclib.save_to_fits(segmented_map, data_map, 'test_output.fits',
-                             'output/', self.test_header)
+                             'output/', self.test_header, confidence)
         path = pl.Path('output/test_output.fits')
         read_seg_data = fits.open('output/test_output.fits')[0].data
         read_data = fits.open('output/test_output.fits')[1].data
@@ -287,17 +288,45 @@ class TestUtils(unittest.TestCase):
         self.assertRaises(TypeError,
                           funclib.save_to_fits, data_map.data,
                           segmented_map, 'test_output.fits',
-                          'output/', self.test_header)
+                          'output/', self.test_header, confidence)
         self.assertRaises(TypeError,
                           funclib.save_to_fits, data_map,
                           segmented_map, 'test_output.fits',
-                          4, self.test_header)
+                          4, self.test_header, confidence)
 
         os.remove('output/test_output.fits')
 
     def test_find_files(self):
-        self.assertTrue(True)
-        self.assertFalse(False)
+        fake_dir = './test_dir/'
+        fake_dir_2 = './test_dir_2/'
+        # this is probably not best practice, but the yml workflow is
+        # OCCASIONALLY running out of time and not removing these
+        # folders, which causes an error next time it is run.
+        # For that reason, I need to try to remove them first thing.
+        try:
+            shutil.rmtree(fake_dir)
+        except FileNotFoundError:
+            pass
+        try:
+            shutil.rmtree(fake_dir_2)
+        except FileNotFoundError:
+            pass
+        os.mkdir(fake_dir)
+        fake_data = np.empty((1, 1))
+        fake_fits_name = 'test.fits'
+        fits.writeto(fake_dir + fake_fits_name, fake_data)
+
+        found_fits = funclib.find_data(fake_dir)
+        # positive test 1: that it can find a fits file in a directory
+        self.assertEqual(fake_fits_name, found_fits[0])
+
+        # error handling case: that it errors if filepath passed
+        # doesn't include data:
+        os.mkdir(fake_dir_2)
+        self.assertRaises(OSError, funclib.find_data, fake_dir_2)
+
+        shutil.rmtree(fake_dir)
+        shutil.rmtree(fake_dir_2)
 
     def test_cross_correlation(self):
         # -------- positive tests -------- :
@@ -309,7 +338,7 @@ class TestUtils(unittest.TestCase):
         test_array_2[0, 0] = 0
 
         self.assertEqual(0, funclib.cross_correlation(test_array_1,
-                                                      test_array_2))
+                                                      test_array_2)[0])
 
         # positive test 2: if cross correlation too low, return -1:
         test_array_1 = np.ones((test_size, test_size))
@@ -318,7 +347,7 @@ class TestUtils(unittest.TestCase):
         test_array_2[0, 0] = 1
 
         self.assertEqual(-1, funclib.cross_correlation(test_array_1,
-                                                       test_array_2))
+                                                       test_array_2)[0])
 
         # ------ error raising tests ------ :
         # error test 1: if no granules or intergranules in skimage cluster:
