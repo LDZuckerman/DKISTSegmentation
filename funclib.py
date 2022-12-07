@@ -527,15 +527,11 @@ def kmeans_cluster(data, llambda_axis=-1):
         labels = np.reshape(Kmeans(n_clusters, n_init).fit(data),
                             (x_size, y_size))
 
-    # now, making granules 0, btwn 1, intergranules 2:
+    # now, making intergranules 0, granules 1:
 
     group0_mean = np.mean(data[labels == 0])
     group1_mean = np.mean(data[labels == 1])
     group2_mean = np.mean(data[labels == 2])
-    # granules
-    max_index = np.argmax([group0_mean,
-                           group1_mean,
-                           group2_mean])
     # intergranules
     min_index = np.argmin([group0_mean,
                            group1_mean,

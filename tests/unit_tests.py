@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append('..')  # nopep8
 import unittest
 import funclib
@@ -136,7 +137,7 @@ class TestUtils(unittest.TestCase):
         # check that the returned type is correct
         data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
         segmented = funclib.segment(self.ibis_fileid, data_map,
-                                    self.test_method,  True, 'test_output/',
+                                    self.test_method, True, 'test_output/',
                                     self.ibis_res)
         test_type = type(segmented)
         self.assertEqual(test_type, sunpy.map.mapbase.GenericMap)
@@ -207,9 +208,9 @@ class TestUtils(unittest.TestCase):
                          funclib.trim_interganules(thresholded).shape)
 
         # new positive test: mark erronous material, not remove.
-        middles_marked =\
+        middles_marked = \
             funclib.trim_interganules(thresholded, mark=True)
-        marked_erroneous =\
+        marked_erroneous = \
             np.count_nonzero(middles_marked[middles_marked == 2])
 
         self.assertNotEqual(marked_erroneous, 0)
@@ -320,6 +321,14 @@ class TestUtils(unittest.TestCase):
         # positive test 1: that it can find a fits file in a directory
         self.assertEqual(fake_fits_name, found_fits[0])
 
+        # negative test 1: test that it doens't find files outside the scope
+        # of the given dataset:
+        fake_fits_name_2 = 'test2.fits'
+        fits.writeto('./' + fake_fits_name_2, fake_data)
+        self.assertNotIn(fake_fits_name_2, funclib.find_data(fake_dir))
+
+        os.remove('./' + fake_fits_name_2)
+
         # error handling case: that it errors if filepath passed
         # doesn't include data:
         os.mkdir(fake_dir_2)
@@ -327,6 +336,34 @@ class TestUtils(unittest.TestCase):
 
         shutil.rmtree(fake_dir)
         shutil.rmtree(fake_dir_2)
+
+    def test_kmeans(self):
+        # positive test: should return np array of same shape as input
+        N = 10
+        array_to_be_clustered = np.ones((N, N))
+        # give some fake different values, so kmeans has something to cluster:
+        array_to_be_clustered[0, 0] = 1
+        array_to_be_clustered[0, 1] = 2
+
+        clustered_array = funclib.kmeans_cluster(array_to_be_clustered,
+                                                 llambda_axis=-1)
+
+        self.assertEqual(np.shape(clustered_array)[0], N)
+
+        # negative test: that the returned labels don't contian a
+        # label they shouldn't (should only be 0 or 1)
+
+        non_label = 3
+        count_non_label_in_cluster =\
+            np.count_nonzero(clustered_array[clustered_array == non_label])
+        self.assertEqual(count_non_label_in_cluster, 0)
+
+        # An error handling case:
+        # should error if passed in data of wrong shape:
+        self.assertRaises(Exception,
+                          funclib.kmeans_cluster,
+                          array_to_be_clustered,
+                          3)
 
     def test_cross_correlation(self):
         # -------- positive tests -------- :
