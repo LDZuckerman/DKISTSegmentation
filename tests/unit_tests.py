@@ -274,18 +274,18 @@ class TestUtils(unittest.TestCase):
         read_seg_data = fits.open('output/test_output.fits')[0].data
         read_data = fits.open('output/test_output.fits')[1].data
 
-        # positive tests
+        # -------- positive tests -------- :
         # check that fits file gets created and two data fields are correct
         self.assertTrue(os.path.exists(path))
         self.assertTrue(np.array_equal(read_seg_data, segmented_map.data))
         self.assertTrue(np.array_equal(read_data, data_map.data))
 
-        # negtaive tests
+        # ------ negative tests ------ :
         # check that that data maps are not switched
         self.assertFalse(np.array_equal(read_seg_data, data_map.data))
         self.assertFalse(np.array_equal(read_data, segmented_map.data))
 
-        # error raising tests
+        # ------ error raising tests ------ :
         self.assertRaises(TypeError,
                           funclib.save_to_fits, data_map.data,
                           segmented_map, 'test_output.fits',
@@ -318,9 +318,11 @@ class TestUtils(unittest.TestCase):
         fits.writeto(fake_dir + fake_fits_name, fake_data)
 
         found_fits = funclib.find_data(fake_dir)
-        # positive test 1: that it can find a fits file in a directory
+        # -------- positive tests -------- :
+        # that it can find a fits file in a directory
         self.assertEqual(fake_fits_name, found_fits[0])
 
+        # ------ negative tests ------ :
         # negative test 1: test that it doens't find files outside the scope
         # of the given dataset:
         fake_fits_name_2 = 'test2.fits'
@@ -329,8 +331,8 @@ class TestUtils(unittest.TestCase):
 
         os.remove('./' + fake_fits_name_2)
 
-        # error handling case: that it errors if filepath passed
-        # doesn't include data:
+        # ------ error raising tests ------ :
+        # that it errors if filepath passed doesn't include data:
         os.mkdir(fake_dir_2)
         self.assertRaises(OSError, funclib.find_data, fake_dir_2)
 
@@ -338,7 +340,8 @@ class TestUtils(unittest.TestCase):
         shutil.rmtree(fake_dir_2)
 
     def test_kmeans(self):
-        # positive test: should return np array of same shape as input
+        # -------- positive tests -------- :
+        # positive test 1: should return np array of same shape as input
         N = 10
         array_to_be_clustered = np.ones((N, N))
         # give some fake different values, so kmeans has something to cluster:
@@ -350,6 +353,7 @@ class TestUtils(unittest.TestCase):
 
         self.assertEqual(np.shape(clustered_array)[0], N)
 
+        # ------ negative tests ------ :
         # negative test: that the returned labels don't contian a
         # label they shouldn't (should only be 0 or 1)
 
@@ -358,7 +362,7 @@ class TestUtils(unittest.TestCase):
             np.count_nonzero(clustered_array[clustered_array == non_label])
         self.assertEqual(count_non_label_in_cluster, 0)
 
-        # An error handling case:
+        # ------ error raising tests ------ :
         # should error if passed in data of wrong shape:
         self.assertRaises(Exception,
                           funclib.kmeans_cluster,
