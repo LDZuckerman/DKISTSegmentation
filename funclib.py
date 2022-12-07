@@ -557,8 +557,12 @@ def cross_correlation(segment1, segment2):
                                  segmented using kmeans).
     ----------
     Returns:
-       -1: if agreement is low (below 75%)
-        0: otherwise
+        A label to summarize the confidence metric (int):
+            -1: if agreement is low (below 75%)
+            0: otherwise
+        The actual confidence metric (float):
+            float between 0 and 1 (0 if no agreement,
+                                   1 if completely agrees)
     """
 
     total_granules = np.count_nonzero(segment1 == 1)
