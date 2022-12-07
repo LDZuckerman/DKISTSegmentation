@@ -49,7 +49,12 @@ def open_file(filename):
     return
 
 
-def save_to_fits(segmented_map, data_map, out_file, out_dir, header):
+def save_to_fits(segmented_map,
+                 data_map,
+                 out_file,
+                 out_dir,
+                 header,
+                 confidence):
     """
     Save input sunpy map and output segmented sunpy map to fits file
     ----------
@@ -59,6 +64,9 @@ def save_to_fits(segmented_map, data_map, out_file, out_dir, header):
         out_file (str): desired name of output fits file
         out_dir (str): filepath for the fits file
         header (fits header object or None): header to use for output fits file
+        confidence (float): fraction out of 1 returned by cross
+                            correlation function (1 = perfect agreement,
+                            0 = no agreement).
     ----------
     Returns:
         None: creates fits file with first extension being the
@@ -86,6 +94,7 @@ def save_to_fits(segmented_map, data_map, out_file, out_dir, header):
             seg_hdu = fits.PrimaryHDU(segmented_map.data, header)
         else:
             seg_hdu = fits.PrimaryHDU(segmented_map.data)
+        seg_hdu.header.append(('KMEANS_CONFIDENCE', confidence))
         raw_hdu = fits.ImageHDU(data_map.data)
         hdu = fits.HDUList([seg_hdu, raw_hdu])
     except Exception:
@@ -144,7 +153,6 @@ def sav_to_map(filename, field):
                                       telescope='Unknown',
                                       instrument='Unknown',
                                       wavelength=np.nan * u.angstrom)
-
     data_map = sunpy.map.Map(data[field], header)
 
     return data_map
@@ -585,6 +593,8 @@ def cross_correlation(segment1, segment2):
             or percentage_agreement_intergranules < 0.75:
         print('Low agreement with K-Means clustering. \
                          Saved output has low confidence.')
-        return -1
+        return [-1, np.mean(percentage_agreement_granules,
+                            percentage_agreement_intergranules)]
     else:
-        return 0
+        return [0, np.mean(percentage_agreement_granules,
+                           percentage_agreement_intergranules)]

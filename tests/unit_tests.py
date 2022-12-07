@@ -309,7 +309,7 @@ class TestUtils(unittest.TestCase):
         test_array_2[0, 0] = 0
 
         self.assertEqual(0, funclib.cross_correlation(test_array_1,
-                                                      test_array_2))
+                                                      test_array_2)[0])
 
         # positive test 2: if cross correlation too low, return -1:
         test_array_1 = np.ones((test_size, test_size))
@@ -318,7 +318,7 @@ class TestUtils(unittest.TestCase):
         test_array_2[0, 0] = 1
 
         self.assertEqual(-1, funclib.cross_correlation(test_array_1,
-                                                       test_array_2))
+                                                       test_array_2)[0])
 
         # ------ error raising tests ------ :
         # error test 1: if no granules or intergranules in skimage cluster:
