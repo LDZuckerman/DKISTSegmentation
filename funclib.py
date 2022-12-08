@@ -188,8 +188,8 @@ def sav_to_numpy(filename, instrument, field):
     return data
 
 
-def segment(file_id, data_map, skimage_method, plot_intermed=True,
-            out_dir='output/', res=0.016):
+def segment(file_id, data_map, skimage_method, res, plot_intermed=True,
+            out_dir='output/'):
     """
     Segment optical image of the solar photosphere into tri-value maps
     with 0 = intergranule, 0.5 = faculae, 1 = granule.
@@ -343,7 +343,7 @@ def trim_interganules(segmented_image, mark=False):
     segmented_image_fixed = np.copy(segmented_image)
     labeled_seg = skimage.measure.label(segmented_image + 1, connectivity=2)
     values = np.unique(labeled_seg)
-    # find value of the 0 region that is big continuous region
+    # find value of the large continuous0-valued region
     size = 0
     for value in values:
         if len((labeled_seg[labeled_seg == value])) > size:
@@ -362,7 +362,7 @@ def trim_interganules(segmented_image, mark=False):
 
 def mark_faculae(segmented_image, data, res):
     """
-    Mark faculae seperatley  from granules - give them a value of 0.5 not 1.
+    Mark faculae seperatley from granules - give them a value of 0.5 not 1.
     ----------
     Parameters:
         segmented_image (numpy array): the segmented image containing
