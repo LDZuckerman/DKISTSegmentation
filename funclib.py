@@ -1,52 +1,22 @@
 import glob
 import os
+import sys
 import astropy.io.fits as fits
 import astropy.units as u
+from astropy.coordinates import SkyCoord
 import matplotlib.pyplot as plt
 import matplotlib.lines as lines
 import matplotlib.patheffects as mpe
 import numpy as np
-import scipy
+import scipy.ndimage as sndi
 import scipy.io as sio
 import skimage
 import sunpy
 import sunpy.map
-from astropy.coordinates import SkyCoord
 from sunpy.coordinates import frames
-from sunpy.map import make_fitswcs_header
-from matplotlib.lines import Line2D
-import sys
 from sklearn.cluster import KMeans as KMeans
 import warnings
 from erfa import ErfaWarning
-
-
-def open_file(filename):
-    """
-    Convenience function for catching file read errors.
-    ----------
-    Parameters:
-        filename: (string) Path to file.
-    ----------
-    Returns:
-        Nothing
-    """
-    if not os.path.exists(filename):
-        raise Exception('Input file ' + filename + ' could not be found.')
-
-    if os.path.isdir(filename):
-        raise Exception('Input file ' + filename + ' is a directory.')
-
-    if not os.access(filename, os.R_OK):
-        raise Exception('Input file ' + filename + ' is not readable.')
-
-    if not (filename.endswith('.sav') | filename.endswith('.gz')):
-        raise Exception('Input file must be a .sav file.')
-
-    if os.path.getsize(filename) == 0:
-        raise Exception('Input file must not be empty.')
-
-    return
 
 
 def save_to_fits(segmented_map,
@@ -56,7 +26,7 @@ def save_to_fits(segmented_map,
                  header,
                  confidence):
     """
-    Save input sunpy map and output segmented sunpy map to fits file
+    Save input sunpy map and output segmented sunpy map to fits file.
     ----------
     Parameters:
         segmented_map (sunpy map): segmented data
@@ -102,6 +72,8 @@ def save_to_fits(segmented_map,
 
     hdu.writeto(filename, overwrite=True)
 
+    return None
+
 
 def sav_to_map(filename, field):
     """
@@ -112,7 +84,7 @@ def sav_to_map(filename, field):
         field (string): Field of sav file to access
     ----------
     Returns:
-        data: SunPy map containing the data and arbitrary coordinate header
+        data: SunPy map containing the data and generic header
     """
 
     # Suppress harmless warning about 'bad' placeholder date in
@@ -133,7 +105,7 @@ def sav_to_map(filename, field):
 
     # Sunpy absolutely requires that a header be present in all sunpy.Map
     # objects. Becuase .sav files do not contain header information, create
-    # as generic a header as possible given the strict requirements
+    # a generic header as a placeholder under the strict requirements
     # imposed by sunpy on header field types and formats. No empty or
     # None fields are permitted by sunpy.Map creation function.
     print('WARNING: .sav input file contains no header; generating ' +
@@ -166,7 +138,7 @@ def fits_to_map(filename):
         filename (string): Path to input data file (.fits format)
     ----------
     Returns:
-        data: SunPy map containing the data and header
+        data_map: SunPy map containing the data and header
     """
 
     try:
@@ -188,7 +160,7 @@ def sav_to_numpy(filename, instrument, field):
     ----------
     Parameters:
         filename (string): Path to input data file (.sav format)
-        instrument (string): The telescope/instrument (ie. IBIS, DKSIST).
+        instrument (string): The telescope/instrument (ie. IBIS, DKIST).
         field (string): Band or data field to read.
     ----------
     Returns:
@@ -216,11 +188,11 @@ def sav_to_numpy(filename, instrument, field):
     return data
 
 
-def segment(file_id, data_map, skimage_method, plot_intermed=True,
-            out_dir='output/', res=0.016):
+def segment(file_id, data_map, skimage_method, res, plot_intermed=True,
+            out_dir='output/'):
     """
     Segment optical image of the solar photosphere into tri-value maps
-    with 0 = inter-granule, 0.5 = faculae, 1 = granule.
+    with 0 = intergranule, 0.5 = faculae, 1 = granule.
     ----------
     Parameters:
         file_id (string): id name of file to be segmented
@@ -228,16 +200,15 @@ def segment(file_id, data_map, skimage_method, plot_intermed=True,
         skimage_method (string): skimage thresholding method -
                                 options are 'otsu', 'li', 'isodata',
                                 'mean', 'minimum', 'yen', 'triangle'
-        plot_intermed (True or False): whether to intermediate data product
-                                image
+        plot_intermed (True or False): whether to plot and save intermediate
+                                data product image
         out_dir (str): Desired directory in which to save intermediate data
                                 product image (if plot_intermed = True);
-                                eventually to be a spatial resolution value
-         res (float): Spatial resolution (arcsec/pixel) of the data
+        res (float): Spatial resolution (arcsec/pixel) of the data
     ----------
     Returns:
-        data_map (SunPy map): SunPy map containing segmentated image (with the
-                              original header)
+        segmented_map (SunPy map): SunPy map containing segmentated image
+                              (with the original header)
     """
 
     if type(data_map) != sunpy.map.mapbase.GenericMap:
@@ -251,7 +222,7 @@ def segment(file_id, data_map, skimage_method, plot_intermed=True,
     header = data_map.meta
 
     # apply median filter
-    median_filtered = scipy.ndimage.median_filter(data, size=3)
+    median_filtered = sndi.median_filter(data, size=3)
 
     # apply threshold
     threshold = get_threshold(median_filtered, skimage_method)
@@ -357,13 +328,13 @@ def trim_interganules(segmented_image, mark=False):
     ----------
     Parameters:
         segmented_image (numpy array): the segmented image containing
-                                       incorrect middles
-        mark (bool): if false, remove erronous intergranules. If true,
-                     mark them as 2 instead.
+                                       incorrect extra intergranules
+        mark (bool): if False, remove erronous intergranules. If True,
+                     mark them as 2 instead (for later examination).
     ----------
     Returns:
         segmented_image_fixed (numpy array): the segmented image without
-                                             incorrect middles
+                                             incorrect extra intergranules
     """
 
     if len(np.unique(segmented_image)) > 2:
@@ -372,7 +343,7 @@ def trim_interganules(segmented_image, mark=False):
     segmented_image_fixed = np.copy(segmented_image)
     labeled_seg = skimage.measure.label(segmented_image + 1, connectivity=2)
     values = np.unique(labeled_seg)
-    # find value of the 0 region that is big continuous region
+    # find value of the large continuous0-valued region
     size = 0
     for value in values:
         if len((labeled_seg[labeled_seg == value])) > size:
@@ -391,12 +362,12 @@ def trim_interganules(segmented_image, mark=False):
 
 def mark_faculae(segmented_image, data, res):
     """
-    Mark faculae seperatly from granules - give them a value of 0.5 not 1
+    Mark faculae seperatley from granules - give them a value of 0.5 not 1.
     ----------
     Parameters:
-        data (numpy array): the original flux values
         segmented_image (numpy array): the segmented image containing
                                 incorrect middles
+        data (numpy array): the original flux values
         res (float): Spatial resolution (arcsec/pixel) of the data
     ----------
     Returns:
@@ -433,19 +404,23 @@ def mark_faculae(segmented_image, data, res):
 
 def find_data(filepath):
     """
-    Given a master filepath, traverses through all embedded directories
-    and files, and returns a list of all the files that end in
+    Given a master filepath, traverse through all embedded directories
+    and files, and return a list of all the files that end in
     .fits or .sav.
 
-    Useful for raw data, which is usually in nested directory structures.
+    Useful for raw data, assumed to be in nested directory structures.
     ----------
     Parameters:
         filepath (string): the filepath to search for .fits or .sav files
     ----------
     Returns:
         files_to_be_segmented (list of strings): the list of files
-                                                 to be segmented.
+                                                 to be segmented
     """
+
+    if not os.path.isdir(filepath):
+        raise Exception(filepath + ' is not a directory.')
+
     files_to_be_segmented = []
     files = os.listdir(filepath)
     for file in files:
@@ -453,6 +428,7 @@ def find_data(filepath):
             files_to_be_segmented.append(file)
     if not files_to_be_segmented:
         raise OSError('No data found in ' + filepath)
+
     return files_to_be_segmented
 
 
@@ -486,20 +462,22 @@ def overplot_velocities(seg_map, input_file, output_path):
     plt.contour(segmented_data, [2], colors='black')
     ax = plt.gca()
     # the next two lines add a legend entry for the contours
-    patches = [Line2D([0], [0],
-                      color='black',
-                      label='Segmentation \n contours',
-                      linewidth=1)]
+    patches = [lines.Line2D([0], [0],
+               color='black',
+               label='Segmentation \n contours',
+               linewidth=1)]
     plt.legend(handles=patches,
                bbox_to_anchor=(0.65, 0.10),
                loc=2, borderaxespad=0.)
 
     plt.savefig(output_path)
 
+    return None
+
 
 def kmeans_cluster(data, llambda_axis=-1):
     """kmeans clustering: uses a kmeans algorithm to cluster data,
-       in order to independently cross correlate the skimage clustering method
+       in order to independently cross correlate the skimage clustering method.
         ----------
        Parameters:
             data (numpy array): data to be clustered
@@ -517,7 +495,7 @@ def kmeans_cluster(data, llambda_axis=-1):
     n_init = 20
     x_size = np.shape(data)[0]
     y_size = np.shape(data)[1]
-    if llambda_axis == -1:  # a scalar array:
+    if llambda_axis == -1:
         data_flat = np.reshape(data, (x_size * y_size, 1))
         labels_flat = KMeans(n_clusters).fit(data_flat).labels_
         labels = np.reshape(labels_flat, (x_size, y_size))
@@ -527,8 +505,7 @@ def kmeans_cluster(data, llambda_axis=-1):
         labels = np.reshape(Kmeans(n_clusters, n_init).fit(data),
                             (x_size, y_size))
 
-    # now, making intergranules 0, granules 1:
-
+    # now, make intergranules 0, granules 1:
     group0_mean = np.mean(data[labels == 0])
     group1_mean = np.mean(data[labels == 1])
     group2_mean = np.mean(data[labels == 2])
@@ -545,22 +522,22 @@ def kmeans_cluster(data, llambda_axis=-1):
 
 def cross_correlation(segment1, segment2):
     """
-    Cross Correlation:
-    returns -1 and prints a message if the agreement between two
+    Return -1 and print a message if the agreement between two
     arrays is low, 0 otherwise. Designed to be used with segment.py
     and funclib.kmeans function.
     ----------
     Parameters:
-        segment1 (numpy array): 'main' array the other one
-                                 is being compared to.
-        segment2 (numpy array): 'other' array (i.e. one
+        segment1 (numpy array): 'main' array to compare the other input
+                                 array against.
+        segment2 (numpy array): 'other' array (i.e. data
                                  segmented using kmeans).
     ----------
     Returns:
-        A label to summarize the confidence metric (int):
+        [label, confidence] (list): where
+        label is a label to summarize the confidence metric (int):
             -1: if agreement is low (below 75%)
             0: otherwise
-        The actual confidence metric (float):
+        confidence is the actual confidence metric (float):
             float between 0 and 1 (0 if no agreement,
                                    1 if completely agrees)
     """
