@@ -418,7 +418,7 @@ def find_data(filepath):
                                                  to be segmented
     """
 
-    if not os.isdir(filepath):
+    if not os.path.isdir(filepath):
         raise Exception(filepath + ' is not a directory.')
 
     files_to_be_segmented = []
