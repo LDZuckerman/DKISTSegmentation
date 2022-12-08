@@ -81,9 +81,9 @@ def main():
         segmented_map = funclib.segment(file_id,
                                         data_map,
                                         skimage_method,
+                                        res,
                                         plot_intermed,
-                                        out_dir,
-                                        res)
+                                        out_dir)
 
         # create a visual comparison against velocity data
         if args.vel_comparison_file is not None:
