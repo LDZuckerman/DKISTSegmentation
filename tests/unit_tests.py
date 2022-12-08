@@ -182,7 +182,7 @@ class TestUtils(unittest.TestCase):
         # -------- positive tests -------- :
         data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
         segmented = funclib.segment(self.ibis_fileid, data_map,
-                                    self.test_method, self.ibis_res, 
+                                    self.test_method, self.ibis_res,
                                     True, 'test_output/')
         test_type = type(segmented)
         # Test 1: check that the returned type is correct
@@ -342,6 +342,8 @@ class TestUtils(unittest.TestCase):
         # Test 3: test that it errors if filepath passed doesn't include data
         os.mkdir(fake_dir_2)
         self.assertRaises(OSError, funclib.find_data, fake_dir_2)
+        self.assertRaises(Exception, funclib.find_data,
+                          './nonexistant_directory')
 
         shutil.rmtree(fake_dir)
         shutil.rmtree(fake_dir_2)
