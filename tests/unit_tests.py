@@ -55,9 +55,9 @@ class TestUtils(unittest.TestCase):
         segmented_map = funclib.segment(self.ibis_fileid,
                                         data_map,
                                         self.test_method,
+                                        self.ibis_res,
                                         True,
-                                        'test_output/',
-                                        self.ibis_res)
+                                        'test_output/')
         confidence = 0
         funclib.save_to_fits(segmented_map, data_map, 'test_output.fits',
                              'output/', self.test_header, confidence)
@@ -182,8 +182,8 @@ class TestUtils(unittest.TestCase):
         # -------- positive tests -------- :
         data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
         segmented = funclib.segment(self.ibis_fileid, data_map,
-                                    self.test_method, True, 'test_output/',
-                                    self.ibis_res)
+                                    self.test_method, self.ibis_res, 
+                                    True, 'test_output/')
         test_type = type(segmented)
         # Test 1: check that the returned type is correct
         self.assertEqual(test_type, sunpy.map.mapbase.GenericMap)
@@ -422,9 +422,9 @@ class TestUtils(unittest.TestCase):
         segmented_map = funclib.segment(self.ibis_fileid,
                                         data_map,
                                         self.test_method,
+                                        self.ibis_res,
                                         True,
-                                        'test_output/',
-                                        self.ibis_res)
+                                        'test_output/')
         out_file_path = 'test_outputs/velocity_comparison.png'
         funclib.overplot_velocities(segmented_map,
                                     self.ibis_testsfile,
