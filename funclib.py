@@ -71,7 +71,7 @@ def save_to_fits(segmented_map,
         raise TypeError('Segmented_map must be a sunpy map')
 
     hdu.writeto(filename, overwrite=True)
-    
+
     return None
 
 
@@ -491,7 +491,7 @@ def kmeans_cluster(data, llambda_axis=-1):
     n_init = 20
     x_size = np.shape(data)[0]
     y_size = np.shape(data)[1]
-    if llambda_axis == -1:  
+    if llambda_axis == -1:
         data_flat = np.reshape(data, (x_size * y_size, 1))
         labels_flat = KMeans(n_clusters).fit(data_flat).labels_
         labels = np.reshape(labels_flat, (x_size, y_size))
