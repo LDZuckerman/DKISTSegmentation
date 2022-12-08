@@ -1,52 +1,24 @@
 import glob
 import os
+import sys
 import astropy.io.fits as fits
 import astropy.units as u
+from astropy.coordinates import SkyCoord
 import matplotlib.pyplot as plt
 import matplotlib.lines as lines
 import matplotlib.patheffects as mpe
 import numpy as np
-import scipy
+import scipy.ndimage as sndi
 import scipy.io as sio
 import skimage
 import sunpy
 import sunpy.map
-from astropy.coordinates import SkyCoord
 from sunpy.coordinates import frames
-from sunpy.map import make_fitswcs_header
-from matplotlib.lines import Line2D
-import sys
+# from sunpy.map import make_fitswcs_header
+# from matplotlib.lines import Line2D
 from sklearn.cluster import KMeans as KMeans
 import warnings
 from erfa import ErfaWarning
-
-
-def open_file(filename):
-    """
-    Convenience function for catching file read errors.
-    ----------
-    Parameters:
-        filename: (string) Path to file.
-    ----------
-    Returns:
-        Nothing
-    """
-    if not os.path.exists(filename):
-        raise Exception('Input file ' + filename + ' could not be found.')
-
-    if os.path.isdir(filename):
-        raise Exception('Input file ' + filename + ' is a directory.')
-
-    if not os.access(filename, os.R_OK):
-        raise Exception('Input file ' + filename + ' is not readable.')
-
-    if not (filename.endswith('.sav') | filename.endswith('.gz')):
-        raise Exception('Input file must be a .sav file.')
-
-    if os.path.getsize(filename) == 0:
-        raise Exception('Input file must not be empty.')
-
-    return
 
 
 def save_to_fits(segmented_map,
@@ -251,7 +223,7 @@ def segment(file_id, data_map, skimage_method, plot_intermed=True,
     header = data_map.meta
 
     # apply median filter
-    median_filtered = scipy.ndimage.median_filter(data, size=3)
+    median_filtered = sndi.median_filter(data, size=3)
 
     # apply threshold
     threshold = get_threshold(median_filtered, skimage_method)
@@ -486,10 +458,10 @@ def overplot_velocities(seg_map, input_file, output_path):
     plt.contour(segmented_data, [2], colors='black')
     ax = plt.gca()
     # the next two lines add a legend entry for the contours
-    patches = [Line2D([0], [0],
-                      color='black',
-                      label='Segmentation \n contours',
-                      linewidth=1)]
+    patches = [lines.Line2D([0], [0],
+               color='black',
+               label='Segmentation \n contours',
+               linewidth=1)]
     plt.legend(handles=patches,
                bbox_to_anchor=(0.65, 0.10),
                loc=2, borderaxespad=0.)
