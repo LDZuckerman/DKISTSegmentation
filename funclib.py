@@ -7,6 +7,7 @@ from astropy.coordinates import SkyCoord
 import matplotlib.pyplot as plt
 import matplotlib.lines as lines
 import matplotlib.patheffects as mpe
+import matplotlib.colors as colors
 import numpy as np
 import scipy.ndimage as sndi
 import scipy.io as sio
@@ -189,7 +190,8 @@ def sav_to_numpy(filename, instrument, field):
 
 
 def segment(file_id, data_map, skimage_method, res, plot_intermed=True,
-            out_dir='output/'):
+            mark_dim_centers=False, out_dir='output/'):
+
     """
     Segment optical image of the solar photosphere into tri-value maps
     with 0 = intergranule, 0.5 = faculae, 1 = granule.
@@ -202,6 +204,8 @@ def segment(file_id, data_map, skimage_method, res, plot_intermed=True,
                                 'mean', 'minimum', 'yen', 'triangle'
         plot_intermed (True or False): whether to plot and save intermediate
                                 data product image
+        mark_dim_centers (True or False): whether to mark dim granule centers
+                                as a seperate catagory for future exploration
         out_dir (str): Desired directory in which to save intermediate data
                                 product image (if plot_intermed = True);
         res (float): Spatial resolution (arcsec/pixel) of the data
@@ -231,51 +235,92 @@ def segment(file_id, data_map, skimage_method, res, plot_intermed=True,
     segmented_image = np.uint8(median_filtered > threshold)
 
     # fix the extra IGM bits in the middle of granules
-    segmented_image_fixed = trim_interganules(segmented_image)
+    segmented_image_fixed = trim_intergranules(segmented_image,
+                                               mark=mark_dim_centers)
 
     # mark faculae
     segmented_image_markfac = mark_faculae(segmented_image_fixed, data, res)
 
     if plot_intermed:
         # show pipeline process
-        fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2, 2, figsize=(15, 15))
-        s1 = 18
-        s2 = 24
+        fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2, 2, figsize=(14, 13))
+        s1 = 16
+        s2 = 22
         fig.suptitle('Intermediate Processesing Steps \n', fontsize=s2)
+
+        # define colormap to bring out faculae and dim middles
+        col_dict = {0: "black",
+                    0.5: "blue",
+                    1: "white",
+                    1.5: "#ffc406"}
+        cmap = colors.ListedColormap([col_dict[x] for x in col_dict.keys()])
+        norm_bins = np.sort([*col_dict.keys()]) + 0.5
+        norm_bins = np.insert(norm_bins, 0, np.min(norm_bins) - 1.0)
+        norm = colors.BoundaryNorm(norm_bins, 4, clip=True)
 
         im0 = ax0.imshow(data / np.max(data), origin='lower')
         ax0.set_title('Scaled Intensity Data', fontsize=s1)
         plt.colorbar(im0, ax=ax0, shrink=0.8)
 
-        im1 = ax1.imshow(segmented_image, cmap='gray', origin='lower')
+        im1 = ax1.imshow(segmented_image, norm=norm, cmap=cmap,
+                         interpolation='none', origin='lower')
         ax1.set_title('Initial Thresholding', fontsize=s1)
-        plt.colorbar(im1, ax=ax1, shrink=0.8)
 
-        im2 = ax2.imshow(segmented_image_fixed, cmap='gray', origin='lower')
-        ax2.set_title('Extraneous IG Material Removed', fontsize=s1)
-        plt.colorbar(im2, ax=ax2, shrink=0.8)
+        im2 = ax2.imshow(segmented_image_fixed, norm=norm, cmap=cmap,
+                         interpolation='none', origin='lower')
+        if mark_dim_centers:
+            ax2.set_title('Dim IG Material Marked', fontsize=s1)
+        if not mark_dim_centers:
+            ax2.set_title('Extraneous IG Material Removed', fontsize=s1)
 
-        im3 = ax3.imshow(segmented_image_markfac, cmap='gray', origin='lower')
+        im3 = ax3.imshow(segmented_image_markfac, norm=norm, cmap=cmap,
+                         interpolation='none', origin='lower')
         ax3.set_title('Faculae Identified', fontsize=s1)
-        plt.colorbar(im3, ax=ax3, shrink=0.8)
 
         plt.tight_layout()
 
+        # rescale axis
+        l0, b0, w0, h0 = ax0.get_position().bounds
+        newpos = [l0, b0-0.01, w0, h0]
+        ax0.set_position(newpos)
+        l1, b1, w1, h1 = ax1.get_position().bounds
+        newpos = [l1, b0-0.01, w0, h0]
+        ax1.set_position(newpos)
+        l2, b2, w2, h2 = ax2.get_position().bounds
+        newpos = [l0, b2, w0, h0]
+        ax2.set_position(newpos)
+        l3, b3, w3, h3 = ax3.get_position().bounds
+        newpos = [l3, b3, w0, h0]
+        ax3.set_position(newpos)
+
+        # add color bar at top
         outline = mpe.withStroke(linewidth=5, foreground='black')
-        custom_lines = [lines.Line2D([0], [0], color='white', lw=4,
-                                     path_effects=[outline]),
-                        lines.Line2D([0], [0], color='black', lw=4),
-                        lines.Line2D([0], [0], color='grey', lw=4)]
         legax = plt.axes([0.1, 0.1, 0.8, 0.85], alpha=0)
         legax.axis('off')
-        legax.legend(custom_lines, ['Granule', 'Intergranule', 'Faculae'],
-                     loc='upper center', ncol=3, fontsize='x-large')
+        if mark_dim_centers:
+            labels = ['Granule', 'Intergranule', 'Faculae', 'Dim Centers']
+            custom_lines = [lines.Line2D([0], [0], color='white', lw=4,
+                                         path_effects=[outline]),
+                            lines.Line2D([0], [0], color='black', lw=4),
+                            lines.Line2D([0], [0], color="#ffc406", lw=4),
+                            lines.Line2D([0], [0], color='blue', lw=4)]
+            ncol = 4
+        if not mark_dim_centers:
+            labels = ['Granule', 'Intergranule', 'Faculae']
+            custom_lines = [lines.Line2D([0], [0], color='white', lw=4,
+                                         path_effects=[outline]),
+                            lines.Line2D([0], [0], color='black', lw=4),
+                            lines.Line2D([0], [0], color="#ffc406", lw=4)]
+            ncol = 3
+        legax.legend(custom_lines, labels, loc='upper center', ncol=ncol,
+                     fontsize='x-large')
 
         if not os.path.exists(out_dir):
             try:
                 os.mkdir(out_dir)
             except Exception:
                 raise OSError('Could not make directory ' + out_dir)
+
         plt.savefig(out_dir + 'segmentation_plots_' + file_id + '.png')
 
     # convert segmentated image back into SunPy map with original header
@@ -321,7 +366,7 @@ def get_threshold(data, method):
     return threshold
 
 
-def trim_interganules(segmented_image, mark=False):
+def trim_intergranules(segmented_image, mark=False):
     """
     Remove the erronous idenfication of intergranule material in the
     middle of granules that pure threshold segmentation produces.
@@ -330,7 +375,7 @@ def trim_interganules(segmented_image, mark=False):
         segmented_image (numpy array): the segmented image containing
                                        incorrect extra intergranules
         mark (bool): if False, remove erronous intergranules. If True,
-                     mark them as 2 instead (for later examination).
+                     mark them as 0.5 instead (for later examination).
     ----------
     Returns:
         segmented_image_fixed (numpy array): the segmented image without
@@ -340,29 +385,31 @@ def trim_interganules(segmented_image, mark=False):
     if len(np.unique(segmented_image)) > 2:
         raise ValueError('segmented_image must have only values of 1 and 0')
 
-    segmented_image_fixed = np.copy(segmented_image)
+    segmented_image_fixed = np.copy(segmented_image).astype(float)
     labeled_seg = skimage.measure.label(segmented_image + 1, connectivity=2)
     values = np.unique(labeled_seg)
-    # find value of the large continuous0-valued region
+    # find value of the large continuous 0-valued region
     size = 0
     for value in values:
         if len((labeled_seg[labeled_seg == value])) > size:
             real_IG_value = value
             size = len(labeled_seg[labeled_seg == value])
-    # set all other 0 regions to 1
+
+    # set all other 0 regions to mark value (1 or 0.5)
     for value in values:
-        if value != real_IG_value:
-            if not mark:
-                segmented_image_fixed[labeled_seg == value] = 1
-            elif mark:
-                segmented_image_fixed[labeled_seg == value] = 2
+        if np.sum(segmented_image[labeled_seg == value]) == 0:
+            if value != real_IG_value:
+                if not mark:
+                    segmented_image_fixed[labeled_seg == value] = 1
+                elif mark:
+                    segmented_image_fixed[labeled_seg == value] = 0.5
 
     return segmented_image_fixed
 
 
 def mark_faculae(segmented_image, data, res):
     """
-    Mark faculae seperatley from granules - give them a value of 0.5 not 1.
+    Mark faculae seperatley from granules - give them a value of 2 not 1.
     ----------
     Parameters:
         segmented_image (numpy array): the segmented image containing
@@ -372,15 +419,16 @@ def mark_faculae(segmented_image, data, res):
     ----------
     Returns:
         segmented_image_fixed (numpy array): the segmented image with faculae
-                                             marked as 0.5
+                                             marked as 1.5
     """
 
     fac_size_limit = 2  # max size of a faculae in sqaure arcsec
     fac_pix_limit = fac_size_limit / res
     fac_brightness_limit = np.mean(data) + 0.5 * np.std(data)
 
-    if len(np.unique(segmented_image)) > 2:
-        raise ValueError('segmented_image must have only values of 1 and 0')
+    if len(np.unique(segmented_image)) > 3:
+        raise ValueError('segmented_image must have only values of 1, 0, ' +
+                         'an 0.5 (if dim centers marked)')
 
     segmented_image = segmented_image
     segmented_image_fixed = np.copy(segmented_image.astype(float))
@@ -397,7 +445,7 @@ def mark_faculae(segmented_image, data, res):
             if region_size < fac_pix_limit:
                 # check that avg flux very high
                 if tot_flux / region_size > fac_brightness_limit:
-                    segmented_image_fixed[mask == 1] = 0.5
+                    segmented_image_fixed[mask == 1] = 1.5
 
     return segmented_image_fixed
 
