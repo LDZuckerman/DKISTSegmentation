@@ -11,6 +11,7 @@ run test_segment_ibis python segment.py \
     --resolution $ibis_res \
     --skimage_method 'li' \
     --plot_intermed True \
+    --mark_dim_centers True \
     --out_file 'output' \
     --vel_comparison_file 'velocity_comparison' \
     --out_dir 'output_IBIS_test/'
@@ -62,6 +63,7 @@ run test_segment_dkist python segment.py \
     --data_path 'data/DKIST' \
     --skimage_method 'li' \
     --plot_intermed True \
+    --mark_dim_centers True \
     --out_file 'output' \
     --out_dir 'output_DKIST_test/'
 
