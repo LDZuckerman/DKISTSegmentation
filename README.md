@@ -5,7 +5,8 @@ Pipeline to segment DKIST images for granule detection
 
 This repository contains a pipeline for segmenting optical images of the solar
 photosphere to identify granules. We segment into tri-valued images with 0 = 
-intergranule, 0.5 = faculae, and 1 = granule. 
+intergranule, 1 = granule, 1.5 = faculae, and (if marking is desired) dim 
+granule middles marked as 0.5. 
 
 These segmentation pipelines are currently implemented for data from the IBIS
 and DKIST telescopes (.sav and .fits formats).
@@ -47,6 +48,8 @@ where
    save an image showing the intermediate data products (default True). If True, 
    will create a plot  showing the steps of segmentation processing and final
    results. 
+* `mark_dim_centers` is a boleen flag indicating whether the user would like to 
+   mark dim intergranule centers for future exploration.
 * `out_dir` is the directory in which to save segmentation plots
 
 We recomend running this function through the `segment.py` script, as per the
@@ -61,8 +64,8 @@ a standard fits placeholder header.
 The script segment.py shows an example use. It can be run on either DKIST or IBIS data.
 Example data files are located in the `data` directory. 
 
-To perform the segmentation on the IBIS data, creating the optional output plots 
-and fits file:
+To perform the segmentation on example IBIS data, creating the optional output plots 
+and fits file, and marking dim intergranule centers:
 
 ```
 python segment.py
@@ -70,13 +73,13 @@ python segment.py
     --resolution 0.096
     --skimage_method 'li'
     --plot_intermed True
+    --mark_dim_centers True
     --out_file 'segmented_data'
     --vel_comparison_file 'velocity_comparison'
     --out_dir 'example_outputs/IBIS/'
 ```
 
-To perform the segmentation on the DKIST data, creating the optional output plots 
-and fits file:
+To perform the same type of segmentation on example DKIST data:
 
 ```
 python segment.py
@@ -84,6 +87,7 @@ python segment.py
     --resolution 0.016
     --skimage_method 'li' 
     --plot_intermed True 
+    --mark_dim_centers True
     --out_file 'segmented_data' 
     --out_dir 'example_outputs/DKIST/'
 ```
@@ -93,6 +97,7 @@ where the arugments are \
 `resolution`: Resolution (arcsec/pix) of data in input directory\
 `skimage_method`: Skimage method to use for initial thresholding\
 `plot_intermed`: True/False - whether or not to save an intermediate data products image\
+`mark_dim_centers`: True/False - whether to mark dim granule centers as a seperate catagory for future exploration\
 `out_file`: (Optional) Desired name of output fits file containing segmented map (extension 0) and input map (extension 1)\
 `vel_comparison_file`: (Optional) Desired name of output image file containing segmented contours overplotted on velocity data.\
 `out_dir`: (Optional) Desired directory in which to save out_file.

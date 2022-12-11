@@ -57,6 +57,7 @@ class TestUtils(unittest.TestCase):
                                         self.test_method,
                                         self.ibis_res,
                                         True,
+                                        False,
                                         'test_output/')
         confidence = 0
         funclib.save_to_fits(segmented_map, data_map, 'test_output.fits',
@@ -183,7 +184,7 @@ class TestUtils(unittest.TestCase):
         data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
         segmented = funclib.segment(self.ibis_fileid, data_map,
                                     self.test_method, self.ibis_res,
-                                    True, 'test_output/')
+                                    True, False, 'test_output/')
         test_type = type(segmented)
         # Test 1: check that the returned type is correct
         self.assertEqual(test_type, sunpy.map.mapbase.GenericMap)
@@ -242,7 +243,7 @@ class TestUtils(unittest.TestCase):
                           [],
                           self.test_method)
 
-    def test_trim_interganules(self):
+    def test_trim_intergranules(self):
         """ Unit tests for trim_intergranules() function
         """
 
@@ -253,25 +254,32 @@ class TestUtils(unittest.TestCase):
         self.assertTrue(np.size(thresholded) > 0)
         # Test 2: check that the correct dimensions are returned
         self.assertEqual(thresholded.shape,
-                         funclib.trim_interganules(thresholded).shape)
+                         funclib.trim_intergranules(thresholded).shape)
         # Test 3: mark erronous material, not remove when flag is True.
         middles_marked = \
-            funclib.trim_interganules(thresholded, mark=True)
+            funclib.trim_intergranules(thresholded, mark=True)
         marked_erroneous = \
-            np.count_nonzero(middles_marked[middles_marked == 2])
+            np.count_nonzero(middles_marked[middles_marked == 0.5])
         self.assertNotEqual(marked_erroneous, 0)
+        # Test 4: remove when flag is False (no 0.5 values)
+        middles_marked = \
+            funclib.trim_intergranules(thresholded, mark=False)
+        marked_erroneous = \
+            np.count_nonzero(middles_marked[middles_marked == 0.5])
+        self.assertEqual(marked_erroneous, 0)
 
         # -------- negative tests -------- :
         # Test 4: check that the returned array has fewer (or same number)
         # 0-valued pixels as input array (for a data set which we
         # know by eye should have some middle sections removed)
-        middles_removed = funclib.trim_interganules(thresholded)
+        middles_removed = funclib.trim_intergranules(thresholded)
         self.assertFalse(np.count_nonzero(middles_removed)
                          < np.count_nonzero(thresholded))
 
         # ------ error raising tests ------ :
         # Test 5: check that raises error if passed array is not binary
-        self.assertRaises(ValueError, funclib.trim_interganules, data_map.data)
+        self.assertRaises(ValueError, funclib.trim_intergranules,
+                          data_map.data)
 
     def test_mark_faculae(self):
         """ Unit tests for mark_faculae() function
@@ -293,7 +301,7 @@ class TestUtils(unittest.TestCase):
         # -------- negative tests -------- :
         # Test 3: check that the returned array has some 0.5 values (for a
         # dataset that we know has faculae by eye)
-        self.assertNotEqual(len(np.where(faculae_marked == 0.5)[0]), 0)
+        self.assertNotEqual(len(np.where(faculae_marked == 1.5)[0]), 0)
 
         # ------ error raising tests ------ :
         # Test 4: check that errors are raised for incorrect inputs
@@ -426,6 +434,7 @@ class TestUtils(unittest.TestCase):
                                         self.test_method,
                                         self.ibis_res,
                                         True,
+                                        False,
                                         'test_output/')
         out_file_path = 'test_outputs/velocity_comparison.png'
         funclib.overplot_velocities(segmented_map,

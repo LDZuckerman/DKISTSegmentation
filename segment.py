@@ -27,6 +27,11 @@ def main():
                         help='True/False - Whether or not to save an '
                              + 'intermediate data products image',
                         required=True)
+    parser.add_argument('--mark_dim_centers',
+                        type=str,
+                        help='True/False - Whether or not to mark dim '
+                             + 'intergranule centers as a seperate class',
+                        required=True)
     parser.add_argument('--out_file',
                         type=str,
                         help='(Optional) Desired name of output fits file '
@@ -55,6 +60,7 @@ def main():
     out_dir = args.out_dir
     out_file = args.out_file
     plot_intermed = args.plot_intermed
+    mark_dim_centers = args.mark_dim_centers
     vel_comp_file = args.vel_comparison_file
 
     # define wavelength band of interest for dkist
@@ -83,6 +89,7 @@ def main():
                                         skimage_method,
                                         res,
                                         plot_intermed,
+                                        mark_dim_centers,
                                         out_dir)
 
         # create a visual comparison against velocity data
