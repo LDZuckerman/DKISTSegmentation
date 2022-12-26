@@ -39,7 +39,7 @@ the segmented image output as a SunPy map. Calls to segment look like:
 segmented_data = segment(file_id, data, skimage_method, resolution, plot_intermed, out_dir)
 ```
 where 
-* `file_id` is a string which identifies the input file for bookkeping purposes
+* `file_id` is a string which identifies the input file for bookeeping purposes
 * `data` is a SunPy map containing an optical image of the solar photosphere
 * `skimage_method` is the base sci-kit image (skimage) segmentation technique 
    to use (see note on thresholds below)
