@@ -480,13 +480,13 @@ def find_data(filepath):
     return files_to_be_segmented
 
 
-def overplot_velocities(seg_map, input_file, output_path):
+def overplot_velocities(seg_map, velocities, output_path):
     """
     Overplot segmentation contours on velocity data as a check on accuracy.
     ----------
     Parameters:
         seg_map (sunpy map): Sunpy map containing segmented data
-        input_file (sav data file): IBIS map to be segmented and overplotted
+        velocities (numpy array): numpy array containing velocity data
         output_path (string): path to save output plot
     ----------
     Returns:
@@ -496,13 +496,10 @@ def overplot_velocities(seg_map, input_file, output_path):
     # Suppress harmless warning from plt.contour
     warnings.filterwarnings(action='ignore', category=UserWarning)
 
-    if input_file.endswith('.sav'):
-        file = sio.readsav(input_file)
-        velocities = file['velocity_cln']
-    else:
-        raise Exception('Velocity data only reported for IBIS datasets.')
-
     segmented_data = seg_map.data
+
+    if np.shape(segmented_data) != np.shape(velocities):
+        raise Exception('Velocity data must be same shape as input flux data.')
 
     plt.figure(figsize=[8, 8])
     plt.imshow(velocities)
@@ -517,6 +514,8 @@ def overplot_velocities(seg_map, input_file, output_path):
     plt.legend(handles=patches,
                bbox_to_anchor=(0.65, 0.10),
                loc=2, borderaxespad=0.)
+
+    print('saving file ', output_path)
 
     plt.savefig(output_path)
 

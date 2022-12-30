@@ -92,12 +92,6 @@ def main():
                                         mark_dim_centers,
                                         out_dir)
 
-        # create a visual comparison against velocity data
-        if args.vel_comparison_file is not None:
-            funclib.overplot_velocities(segmented_map,
-                                        data_path + '/' + input_file,
-                                        out_dir + '/' + vel_comp_file + '_' +
-                                        file_id + '.png')
         # check out put via kmeans:
         # still working on IBIS data:
         if input_file.endswith('.fits'):

@@ -75,7 +75,6 @@ python segment.py
     --plot_intermed True
     --mark_dim_centers True
     --out_file 'segmented_data'
-    --vel_comparison_file 'velocity_comparison'
     --out_dir 'example_outputs/IBIS/'
 ```
 
@@ -99,7 +98,6 @@ where the arugments are \
 `plot_intermed`: True/False - whether or not to save an intermediate data products image\
 `mark_dim_centers`: True/False - whether to mark dim granule centers as a seperate catagory for future exploration\
 `out_file`: (Optional) Desired name of output fits file containing segmented map (extension 0) and input map (extension 1)\
-`vel_comparison_file`: (Optional) Desired name of output image file containing segmented contours overplotted on velocity data.\
 `out_dir`: (Optional) Desired directory in which to save out_file.
 
 The outputs of these example calls are located in the `example_outputs\IBIS` and 
