@@ -8,8 +8,7 @@ photosphere to identify granules. We segment into tri-valued images with 0 =
 intergranule, 1 = granule, 1.5 = faculae, and (if marking is desired) dim 
 granule middles marked as 0.5. 
 
-These segmentation pipelines are currently implemented for data from the IBIS
-and DKIST telescopes (.sav and .fits formats).
+These segmentation pipelines are currently implemented for data in .sav and .fits formats, with examples using IBIS and DKIST data.
 
 For possible future integration with the SunPy package, we first convert test 
 data to SunPy maps, and outputs are converted to SunPy maps as well. 
@@ -61,8 +60,9 @@ a standard fits placeholder header.
 
 ## Example
 
-The script segment.py shows an example use. It can be run on either DKIST or IBIS data.
-Example data files are located in the `data` directory. 
+The script segment.py shows example uses. An IBIS data file shows use with a .sav
+file format, and a DKIST data file shows use with at .fits file format.
+These example data files are located in the `data` directory. 
 
 To perform the segmentation on example IBIS data, creating the optional output plots 
 and fits file, and marking dim intergranule centers:
