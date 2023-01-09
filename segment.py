@@ -100,6 +100,9 @@ def main():
             kmeans_return = funclib.cross_correlation(segmented_map.data,
                                                       kmeans_labels)
             confidence = kmeans_return[1]
+
+            print(confidence)
+
         else:
             confidence = 0
 
