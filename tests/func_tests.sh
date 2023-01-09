@@ -13,7 +13,6 @@ run test_segment_ibis python segment.py \
     --plot_intermed True \
     --mark_dim_centers True \
     --out_file 'output' \
-    --vel_comparison_file 'velocity_comparison' \
     --out_dir 'output_IBIS_test/'
 
 curr_dir=$(pwd)
@@ -39,17 +38,7 @@ else
 fi
 rm $path
 
-# TEST 3: check that the output velocity plot actually exists
-file='/velocity_comparison_'$file_id'.png'
-path=$curr_dir$test_dir$file
-if [ -f "$path" ]; then
-   echo ' TEST SUCCEEDED: velocity comparison plot found in '$path 
-else
-   echo ' TEST FAILED: velocity comparison plot not found in '$path 
-fi
-rm $path
-
-# TEST 4: check that the process runs with no errors
+# TEST 3: check that the process runs with no errors
 assert_exit_code 0
 
 rm -r $curr_dir$test_dir

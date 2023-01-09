@@ -11,6 +11,7 @@ from astropy.io import fits
 import os
 import pathlib as pl
 import scipy
+import scipy.io as sio
 import shutil
 
 
@@ -424,9 +425,12 @@ class TestUtils(unittest.TestCase):
         self.assertRaises(Exception, funclib.cross_correlation,
                           test_array_1, test_array_2)
 
-    def overplot_velocities(self):
+    def test_overplot_velocities(self):
         """ Unit tests for overplot_velocities() function
         """
+
+        file = sio.readsav(self.ibis_testfile)
+        velocities = file['velocity_cln']
 
         data_map = funclib.sav_to_map(self.ibis_testfile, self.test_band)
         segmented_map = funclib.segment(self.ibis_fileid,
@@ -436,9 +440,9 @@ class TestUtils(unittest.TestCase):
                                         True,
                                         False,
                                         'test_output/')
-        out_file_path = 'test_outputs/velocity_comparison.png'
+        out_file_path = 'test_output/velocity_comparison.png'
         funclib.overplot_velocities(segmented_map,
-                                    self.ibis_testsfile,
+                                    velocities,
                                     out_file_path)
 
         # -------- positive tests -------- :
@@ -452,6 +456,4 @@ class TestUtils(unittest.TestCase):
         # ------ error raising tests ------ :
         # Test 3: check that errors for incorrect input
         self.assertRaises(Exception, funclib.overplot_velocities,
-                          segmented_map, cls.dkist_testfile, out_file_path)
-        self.assertRaises(Exception, funclib.overplot_velocities,
-                          [[1, 2, 3], [4, 5, 6]], out_file_path)
+                          segmented_map, velocities.flatten(), out_file_path)
