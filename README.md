@@ -10,7 +10,7 @@ granule middles marked as 0.5.
 
 These segmentation pipelines are currently implemented for data in .sav and .fits formats, with examples using IBIS and DKIST data.
 
-For possible future integration with the SunPy package, we first convert test 
+For integration with the SunPy package, we first convert test 
 data to SunPy maps, and outputs are converted to SunPy maps as well. 
 
 ## Conda Environment
